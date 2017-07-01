@@ -3,7 +3,6 @@ AD_OS=macos
 AD_ARCH=x64
 AD_COMPILER=clang
 AD_PROFILE=release
-AD_EXEC=$AD_OS/$AD_ARCH/$AD_COMPILER/$AD_PROFILE
 AD_DIR=~/dev/thirdparty
 AD_SDL2=$AD_DIR/SDL/SDL2-2.0.5
 AD_SDL2_IMAGE=$AD_DIR/SDL/SDL2_image-2.0.1
@@ -24,7 +23,44 @@ AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
 USE_GPL=false
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TEMPDIR="${BASEDIR}/temp"
+mkdir temp
+cd temp
+
 echo "Running script from $BASEDIR"
+echo "Currently in $TEMPDIR"
+
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -d | --directory )      shift
+                                AD_DIR=$1
+                                ;;
+        -o | --os )             shift
+                                AD_OS=$1
+                                ;;
+        -a | --arch )           shift
+                                AD_ARCH=$1
+                                ;;
+        -c | --compiler )       shift
+                                AD_COMPILER=$1
+                                ;;
+        -p | --profile )        shift
+                                AD_PROFILE=$1
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+Usage ()
+{
+    echo "Usage: [[[-f file ] [-i]] | [-h]] "
+}
 
 
 
@@ -33,8 +69,23 @@ AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops 
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
+if [ "$AD_COMPILER" = "gcc" ]
+then
+    AD_CFLAGS="$AD_CFLAGS -frename-registers"
+fi
+
+echo "CFLAGS: $AD_CFLAGS"
+
+
+AD_EXEC=$AD_OS/$AD_ARCH/$AD_COMPILER/$AD_PROFILE
+echo "Build dir: $AD_EXEC"
+
+
+echo "Thirdparty directory: $AD_DIR"
+
 if false
 then
+
 
 #zlib license
 #https://zlib.net/
@@ -51,6 +102,7 @@ $AD_LIBPNG/./configure CFLAGS="$LIBPNG_CFLAGS" --enable-intel-sse --disable-shar
 make clean
 make
 make install
+
 
 #IJG libjpg
 #Wikipedia says BSD like
@@ -70,10 +122,14 @@ make clean
 make
 make install
 
+fi
 
 #permissive
 #http://www.simplesystems.org/libtiff/
-$AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC
+$AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC
+
+if false
+then
 
 #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
 #--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
@@ -103,7 +159,7 @@ cd $AD_BZIP
 make clean
 make CFLAGS="$AD_CFLAGS"
 make install -f $AD_BZIP/makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
-cd $BASEDIR
+cd $TEMPDIR
 
 
 
@@ -161,7 +217,7 @@ $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static 
 make clean
 make LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon"
 make install
-cd $BASEDIR
+cd $TEMPDIR
 
 
 
@@ -173,11 +229,13 @@ make
 make install
 
 
-fi
+
 
 
 $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC
 make clean
 make
 make install
+
+fi
 
