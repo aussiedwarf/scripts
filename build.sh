@@ -96,9 +96,9 @@ $AD_ZLIB/./configure --static --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$
 make clean
 make CFLAGS="$AD_CFLAGS"
 make install
-cd $TEMPDIR
+cd $BASEDIR
 
-fi
+
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
@@ -112,21 +112,23 @@ $AD_LIBPNG/./configure CFLAGS="$AD_CFLAGS" --enable-intel-sse --disable-shared -
 make clean
 make
 make install
-cd $TEMPDIR
+cd $BASEDIR
 
 
-if false
-then
 
 #IJG libjpg
 #Wikipedia says BSD like
 #http://www.ijg.org/
 #https://sourceforge.net/projects/libjpeg/
 echo "Building libjpeg"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_LIBJPG/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBJPG/build --exec-prefix=$AD_LIBJPG/build/$AD_EXEC
 make clean
 make
 make install
+cd $BASEDIR
 
 
 
@@ -134,15 +136,23 @@ make install
 #public domain
 #https://tukaani.org/xz/
 echo "Building xz"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_XZ/build --exec-prefix=$AD_XZ/build/$AD_EXEC
 make clean
 make
 make install
+cd $BASEDIR
+
 
 
 #permissive
 #http://www.simplesystems.org/libtiff/
 echo "Building libtiff"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC
 
 
@@ -157,16 +167,22 @@ $AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-
 make clean
 make
 make install
+cd $BASEDIR
 
 
 
 #permissive
 #http://giflib.sourceforge.net/
 echo "Building giflib"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_LIBGIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBGIF/build --exec-prefix=$AD_LIBGIF/build/$AD_EXEC
 make clean
 make
 make install
+cd $BASEDIR
+
 
 
 #permissive
@@ -176,12 +192,16 @@ cd $AD_BZIP
 make clean
 make CFLAGS="$AD_CFLAGS"
 make install -f $AD_BZIP/Makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
-cd $TEMPDIR
+cd $BASEDIR
+
 
 
 #permissive
 #
 echo "Building SDL2"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_SDL2/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2/build --exec-prefix=$AD_SDL2/build/$AD_EXEC
 #ALSA or esd may be needed on linux for sound
 #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -193,6 +213,8 @@ $AD_SDL2/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable
 make clean
 make
 make install
+cd $BASEDIR
+
 
 
 #https://www.freedesktop.org/wiki/Software/HarfBuzz/
@@ -202,26 +224,35 @@ make install
 #permissive with advertising
 #https://freetype.org/index.html
 echo "Building Freetype"
-$AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no
+rm -rf temp
+mkdir temp
+cd temp
+$AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no
 make clean
 make
 make install
-
+cd $BASEDIR
 
 
 #HARFBUZZ_CFLAGS C compiler flags for HARFBUZZ, overriding pkg-config
 #HARFBUZZ_LIBS linker flags for HARFBUZZ, overriding pkg-config
 
-
+fi
 
 #permissive
 #$AD_LIBWEBP/./autogen.sh
 echo "Building libwebp"
-$AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIF/build/include --with-tifflibdir=$AD_LIBTIF/build/$AD_EXEC/lib --with-gifincludedir=$AD_LIBGIF/build/include  --with-giflibdir=$AD_LIBGIF/build/$AD_EXEC/lib --with-sdlincludedir=$AD_SDL2/build/include --with-sdllibdir=$AD_SDL2/build/$AD_EXEC/lib 
---with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC
+rm -rf temp
+mkdir temp
+cd temp
+$AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIF/build/include --with-tifflibdir=$AD_LIBTIF/build/$AD_EXEC/lib --with-gifincludedir=$AD_LIBGIF/build/include  --with-giflibdir=$AD_LIBGIF/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz"
 make clean
 make
 make install
+cd $BASEDIR
+
+if false
+then
 
 
 #permissive
