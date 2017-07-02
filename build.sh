@@ -24,8 +24,7 @@ USE_GPL=false
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMPDIR="${BASEDIR}/temp"
-mkdir temp
-cd temp
+
 
 echo "Running script from $BASEDIR"
 echo "Currently in $TEMPDIR"
@@ -89,47 +88,63 @@ then
 
 #zlib license
 #https://zlib.net/
+echo "Building zlib"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_ZLIB/./configure --static --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
 make clean
 make CFLAGS="$AD_CFLAGS"
 make install
+cd $TEMPDIR
 
+fi
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
-LIBPNG_CFLAGS=$AD_CFLAGS" -I$AD_ZLIB/build/include"
-$AD_LIBPNG/./configure CFLAGS="$LIBPNG_CFLAGS" --enable-intel-sse --disable-shared --enable-static --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$AD_EXEC 
+echo "Building libpng"
+rm -rf temp
+mkdir temp
+cd temp
+LIBPNG_CFLAGS="$AD_CFLAGS -I$AD_ZLIB/build/include"
+echo "LIBPNG FLAGS $LIBPNG_CFLAGS"
+$AD_LIBPNG/./configure CFLAGS="$AD_CFLAGS" --enable-intel-sse --disable-shared --enable-static LDFLAGS=-L$AD_ZLIB/build/$AD_EXEC/lib --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$AD_EXEC CPPFLAGS="-I$AD_ZLIB/build/include"
 make clean
 make
 make install
+cd $TEMPDIR
 
+
+if false
+then
 
 #IJG libjpg
 #Wikipedia says BSD like
 #http://www.ijg.org/
 #https://sourceforge.net/projects/libjpeg/
+echo "Building libjpeg"
 $AD_LIBJPG/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBJPG/build --exec-prefix=$AD_LIBJPG/build/$AD_EXEC
 make clean
 make
 make install
 
 
+
 #LZMA
 #public domain
 #https://tukaani.org/xz/
+echo "Building xz"
 $AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_XZ/build --exec-prefix=$AD_XZ/build/$AD_EXEC
 make clean
 make
 make install
 
-fi
 
 #permissive
 #http://www.simplesystems.org/libtiff/
+echo "Building libtiff"
 $AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC
 
-if false
-then
 
 #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
 #--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
@@ -144,28 +159,29 @@ make
 make install
 
 
+
 #permissive
 #http://giflib.sourceforge.net/
+echo "Building giflib"
 $AD_LIBGIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBGIF/build --exec-prefix=$AD_LIBGIF/build/$AD_EXEC
 make clean
 make
 make install
 
 
-
 #permissive
 #http://www.bzip.org/
+echo "Building bzip2"
 cd $AD_BZIP
 make clean
 make CFLAGS="$AD_CFLAGS"
-make install -f $AD_BZIP/makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
+make install -f $AD_BZIP/Makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
 cd $TEMPDIR
-
-
 
 
 #permissive
 #
+echo "Building SDL2"
 $AD_SDL2/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2/build --exec-prefix=$AD_SDL2/build/$AD_EXEC
 #ALSA or esd may be needed on linux for sound
 #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -179,17 +195,19 @@ make
 make install
 
 
-
 #https://www.freedesktop.org/wiki/Software/HarfBuzz/
 #complex package requires ICU flus freetype circular dependency
 #$AD_HARFBUZZ/./configure -h --enable-static
 
 #permissive with advertising
 #https://freetype.org/index.html
+echo "Building Freetype"
 $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no
 make clean
 make
 make install
+
+
 
 #HARFBUZZ_CFLAGS C compiler flags for HARFBUZZ, overriding pkg-config
 #HARFBUZZ_LIBS linker flags for HARFBUZZ, overriding pkg-config
@@ -198,6 +216,7 @@ make install
 
 #permissive
 #$AD_LIBWEBP/./autogen.sh
+echo "Building libwebp"
 $AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIF/build/include --with-tifflibdir=$AD_LIBTIF/build/$AD_EXEC/lib --with-gifincludedir=$AD_LIBGIF/build/include  --with-giflibdir=$AD_LIBGIF/build/$AD_EXEC/lib --with-sdlincludedir=$AD_SDL2/build/include --with-sdllibdir=$AD_SDL2/build/$AD_EXEC/lib 
 --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC
 make clean
@@ -209,20 +228,20 @@ make install
 #compile error in config https://github.com/Linuxbrew/legacy-linuxbrew/issues/172
 #seems to use sdl lib location for webp
 
-
-cd $AD_SDL2_IMAGE
+echo "Building SDL2_image"
+#cd $AD_SDL2_IMAGE
 
 $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC  SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIF/build/$AD_EXEC/lib -L$AD_LIBGIF/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" 
 
 make clean
 make LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon"
 make install
-cd $TEMPDIR
+#cd $TEMPDIR
 
 
 
 
-
+echo "Building SDL2_ttf"
 $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC
 make clean
 make
@@ -231,7 +250,7 @@ make install
 
 
 
-
+echo "Building SDL2_net"
 $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC
 make clean
 make
