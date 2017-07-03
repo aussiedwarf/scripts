@@ -251,7 +251,7 @@ make
 make install
 cd $BASEDIR
 
-fi
+
 
 #permissive
 #compile error in config https://github.com/Linuxbrew/legacy-linuxbrew/issues/172
@@ -283,17 +283,18 @@ fi
 cd $BASEDIR
 
 
-if false
-then
+fi
 
 
 echo "Building SDL2_ttf"
-$AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC
+$AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" LIBS="-lfreetype"
 make clean
-make
+make LIBS="-lfreetype -lSDL2 -lpng -lbz2" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib"
 make install
 
 
+if false
+then
 
 
 echo "Building SDL2_net"
