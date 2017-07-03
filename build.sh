@@ -282,26 +282,34 @@ else
 fi
 cd $BASEDIR
 
-
 fi
 
-
 echo "Building SDL2_ttf"
-$AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" LIBS="-lfreetype"
+rm -rf temp
+mkdir temp
+cd temp
+
+$AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2"
 make clean
 make LIBS="-lfreetype -lSDL2 -lpng -lbz2" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib"
 make install
-
+cd $BASEDIR
 
 if false
 then
 
-
 echo "Building SDL2_net"
+rm -rf temp
+mkdir temp
+cd temp
 $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC
 make clean
 make
 make install
 
+cd $BASEDIR
+
 fi
+
+
 
