@@ -1,14 +1,18 @@
 #!/bin/sh
+#./build.sh -c clang -o ubuntu16.04 -a x64
 AD_OS=macos
 AD_ARCH=x64
 AD_COMPILER=clang
 AD_PROFILE=release
+AD_CC=gcc
+AD_CXX=g++
 AD_DIR=~/dev/thirdparty
 AD_SDL2=$AD_DIR/SDL/SDL2-2.0.5
 AD_SDL2_IMAGE=$AD_DIR/SDL/SDL2_image-2.0.1
 AD_SDL2_TTF=$AD_DIR/SDL/SDL2_ttf-2.0.14
 AD_SDL2_NET=$AD_DIR/SDL/SDL2_net-2.0.1
-AD_ZLIB=$AD_DIR/zlib/zlib-1.2.11
+AD_ZLIB_DIR=zlib/zlib-1.2.11
+AD_ZLIB="$AD_DIR/$AD_ZLIB_DIR"
 AD_LIBPNG=$AD_DIR/libpng/libpng-1.6.29
 AD_LIBJPG=$AD_DIR/libjpeg/jpeg-9b                    
 #AD_JBIGKIT=$AD_DIR/
@@ -63,6 +67,9 @@ Usage ()
 
 
 
+
+
+
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3"
 # -msse4.1 -msse4.2 -msse4
@@ -71,6 +78,14 @@ AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops 
 if [ "$AD_COMPILER" = "gcc" ]
 then
     AD_CFLAGS="$AD_CFLAGS -frename-registers"
+    AD_CC="gcc"
+    AD_CXX="g++"
+fi
+
+if [ "$AD_COMPILER" = "clang" ]
+then
+    AD_CC="clang"
+    AD_CXX="clang++"
 fi
 
 echo "CFLAGS: $AD_CFLAGS"
@@ -82,25 +97,36 @@ echo "Build dir: $AD_EXEC"
 
 echo "Thirdparty directory: $AD_DIR"
 
-if false
-then
 
-fi
+StartBuild()
+{
+    rm -rf temp
+    mkdir temp
+    cd temp
+    cp -R "$1/build" "$TEMPDIR/build"
+    rm -rf "$1"
+    cp -R "$BASEDIR/thirdparty/$2" "$1"
+}
+
+EndBuild()
+{
+    cp -R "$TEMPDIR/build" $1
+    cd $BASEDIR
+}
+
 
 
 #zlib license
 #https://zlib.net/
 echo "Building zlib"
-rm -rf temp
-mkdir temp
-cd temp
+StartBuild $AD_ZLIB $AD_ZLIB_DIR
 $AD_ZLIB/./configure --static --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
-make clean
-make CFLAGS="$AD_CFLAGS"
+make CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX"
 make install
-cd $BASEDIR
+EndBuild $AD_ZLIB
 
-
+if false
+then
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
@@ -324,6 +350,6 @@ make install
 cd $BASEDIR
 
 
-
+fi
 
 
