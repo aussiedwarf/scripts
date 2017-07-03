@@ -43,3 +43,18 @@ SDL2_net
 SDL2_image libpng, libz, libtiff, libjpeg, webp
 glew2.0
 
+
+On Ubuntu the folliwing commands are needed
+
+#Needed to view shared folders in virtualbox
+#sudo usermod -a -G vboxsf hypergiant
+#copy thirdparty library to dev folder
+
+sudo apt-get install git g++ build-essential libgl1-mesa-glx libgl1-mesa-dev mesa-common-dev libglu1-mesa libglu1-mesa-dev -y
+
+git clone https://github.com/aussiedwarf/scripts.git scripts
+cd scripts
+./build.sh -c gcc -o ubuntu16.04 -a x64
+
+
+
