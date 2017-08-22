@@ -6,6 +6,8 @@ AD_COMPILER=clang
 AD_PROFILE=release
 AD_CC=gcc
 AD_CXX=g++
+AD_MAKE=make
+AD_AR=""
 AD_DIR=~/dev/thirdparty
 AD_SDL2_DIR=SDL/SDL2-2.0.5
 AD_SDL2="$AD_DIR/$AD_SDL2_DIR"
@@ -84,7 +86,7 @@ Usage ()
 
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
-AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3"
+AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
@@ -101,6 +103,21 @@ then
     AD_CXX="clang++"
 fi
 
+if [ "$AD_COMPILER" = "emscripten" ]
+then
+  AD_ARCH="all"
+  AD_OS="all"
+  AD_CC="emcc"
+  AD_CXX="em++"
+  AD_AR="AR=emcc"
+  AD_MAKE="emmake make"
+fi
+
+if [ "$AD_ARCH" = "x64" ] || [ "$AD_ARCH" = "x86" ]
+then
+   AD_CFLAGS="$AD_CFLAGS -mfpmath=sse -msse -msse2 -msse3 -mssse3"
+fi
+
 echo "CFLAGS: $AD_CFLAGS"
 
 
@@ -110,7 +127,7 @@ echo "Build dir: $AD_EXEC"
 
 echo "Thirdparty directory: $AD_DIR"
 
-
+#mac warns to not use -ra for cp
 StartBuild()
 {
     rm -rf temp
@@ -121,17 +138,17 @@ StartBuild()
     rm -rf "$1/build/$AD_EXEC"
     #copy builds with other settings
     echo "Copying $1/build TO $TEMPDIR/build"
-    cp -ra "$1/build" "$TEMPDIR/build"
+    cp -a "$1/build" "$TEMPDIR/build"
     echo "Removing $1"
     rm -rf "$1"
     echo "Copying $BASEDIR/thirdparty/$2 TO $1"
-    cp -ra "$BASEDIR/thirdparty/$2" "$1"
+    cp -a "$BASEDIR/thirdparty/$2" "$1"
 }
 
 EndBuild()
 {
     echo "Copying $TEMPDIR/build TO $1"
-    cp -ra "$TEMPDIR/build" "$1"
+    cp -a "$TEMPDIR/build" "$1"
     cd $BASEDIR
 }
 
@@ -142,9 +159,12 @@ EndBuild()
 echo "Building zlib"
 StartBuild $AD_ZLIB $AD_ZLIB_DIR
 $AD_ZLIB/./configure --static --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
-make CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX"
-make install
+$AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" "$AD_AR"
+#$AD_MAKE install
 EndBuild $AD_ZLIB
+
+if false
+then
 
 
 
@@ -356,5 +376,5 @@ make CC="$AD_CC" CXX="$AD_CXX"
 make install
 EndBuild $AD_SDL2_NET
 
-
+fi
 
