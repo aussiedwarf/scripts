@@ -121,7 +121,7 @@ fi
 echo "CFLAGS: $AD_CFLAGS"
 
 
-AD_EXEC=$AD_OS/$AD_ARCH/$AD_COMPILER/$AD_PROFILE
+AD_EXEC=$AD_ARCH/$AD_OS/$AD_COMPILER/$AD_PROFILE
 echo "Build dir: $AD_EXEC"
 
 
@@ -170,6 +170,7 @@ then
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
+#requires zlib
 echo "Building libpng"
 StartBuild $AD_LIBPNG $AD_LIBPNG_DIR
 $AD_LIBPNG/./configure CFLAGS="$AD_CFLAGS" --enable-intel-sse --disable-shared --enable-static LDFLAGS=-L$AD_ZLIB/build/$AD_EXEC/lib --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$AD_EXEC CPPFLAGS="-I$AD_ZLIB/build/include" CC="$AD_CC" CXX="$AD_CXX"
@@ -220,6 +221,7 @@ EndBuild $AD_XZ
 
 #permissive
 #http://www.simplesystems.org/libtiff/
+#requires xz, zlib, libjpg
 echo "Building libtiff"
 StartBuild $AD_LIBTIF $AD_LIBTIF_DIR
 $AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
@@ -288,6 +290,7 @@ EndBuild $AD_SDL2
 
 #permissive with advertising
 #https://freetype.org/index.html
+#requires zlib, libpng, bzip2, harfbuzz(currently disabled)
 echo "Building Freetype"
 StartBuild $AD_FREETYPE $AD_FREETYPE_DIR
 $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"

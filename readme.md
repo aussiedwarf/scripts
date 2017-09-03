@@ -4,7 +4,9 @@ Scripts
 Build scripts
 ------------------
 
-Build files to build SDL and dependicies for multiple systems
+fetch.sh downloads and instals dependicies
+
+build.sh Build files to build SDL and dependicies for multiple systems
 
 OS's, arch, compilers
 Windows VS2015/VS2017/MingW/Clang TODO
