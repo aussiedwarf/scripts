@@ -43,11 +43,17 @@ tar -xf thirdparty/giflib/giflib-5.1.4.tar.bz2 -C thirdparty/giflib/
 wget -O thirdparty/bzip2/bzip2-1.0.6.tar.gz http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
 tar -xf thirdparty/bzip2/bzip2-1.0.6.tar.gz -C thirdparty/bzip2/
 
+#https://freetype.org/index.html
+#https://download.savannah.gnu.org/releases/freetype/
+wget -O thirdparty/freetype/freetype-2.8.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.8.1.tar.bz2
+tar -xf thirdparty/freetype/freetype-2.8.1.tar.bz2 -C thirdparty/freetype
 
+#webp
+git clone https://chromium.googlesource.com/webm/libwebp thirdparty/webp/master
+
+#SDL1
 
 #SDL2
-
-#https://freetype.org/index.html
 wget -O thirdparty/SDL/SDL2-2.0.5.tar.gz https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
 tar -xf thirdparty/SDL/SDL2-2.0.5.tar.gz -C thirdparty/SDL/
 
@@ -60,12 +66,9 @@ tar -xf thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz -C thirdparty/SDL/
 wget -O thirdparty/SDL/SDL2_net-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz
 tar -xf thirdparty/SDL/SDL2_net-2.0.1.tar.gz -C thirdparty/SDL/
 
-#webp
 
-#SDL2_image
+#libbpg
+#https://bellard.org/bpg/
+wget -O thirdparty/libbpg/libbpg-0.9.7 https://bellard.org/bpg/libbpg-0.9.7.tar.gz
+tar -xf thirdparty/libbpg/libbpg-0.9.7.tar.gz -C thirdparty/libbpg/
 
-#SDL2_ttf
-
-#SDL2_net
-
-fi

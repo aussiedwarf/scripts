@@ -195,18 +195,40 @@ CheckStatus()
   fi
 }
 
+if false
+then
 
+#Build* functions take 2, sometime 3 parameters
+#$1 is "static" or "shared"
+#$2 is the arch, "x86", "x64", emscripten, arm, etc
+#$3 is profile debug or release
+#$4 is license, free, lgpl, gpl when needed
 
 #zlib license
 #https://zlib.net/
-echo "Building zlib"
-StartBuild $AD_ZLIB $AD_ZLIB_DIR
-$AD_ZLIB/./configure --static --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
-CheckStatus "Zlib"
-$AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
-CheckStatus "Zlib"
-$AD_MAKE install
-EndBuild $AD_ZLIB
+BuildZLib()
+{
+  if [ $4 eq "free" ] then
+    echo "Building zlib"
+    StartBuild $AD_ZLIB $AD_ZLIB_DIR
+  
+    STATIC=""
+    if [$1 eq "static"] then
+      STATIC="--static"
+    fi
+  
+    $AD_ZLIB/./configure $STATIC --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
+  
+    CheckStatus "Zlib"
+    $AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
+    CheckStatus "Zlib"
+    $AD_MAKE install
+    EndBuild $AD_ZLIB
+  fi
+}
+
+
+
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
@@ -429,7 +451,6 @@ $AD_MAKE install
 EndBuild $AD_SDL2_TTF
 
 
-
 echo "Building SDL2_net"
 StartBuild $AD_SDL2_NET $AD_SDL2_NET_DIR
 $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
@@ -439,7 +460,7 @@ CheckStatus "SDL2_net"
 $AD_MAKE install
 EndBuild $AD_SDL2_NET
 
-
+fi
 
 #combiniation of lgpl and gpl
 #depends on libpng, zlib, sdl
@@ -447,8 +468,48 @@ echo "Building libbpg"
 StartBuild $AD_LIBBPG $AD_LIBBPG_DIR
 cd $AD_LIBBPG
 echo "$AD_LIBPNG/build/$AD_EXEC/lib"
-C_INCLUDE_PATH="$C_INCLUDE_PATH:$AD_LIBPNG/build/include:$AD_LIBJPG/build/include" LIBRARY_PATH="$LIBRARY_PATH:$AD_LIBPNG/build/$AD_EXEC/lib:$AD_ZLIB/build/$AD_EXEC/lib:$AD_LIBJPG/build/$AD_EXEC/lib" $AD_MAKE CONFIG_APPLE=y prefix=build/$AD_EXEC LIBS=-lz -j"$AD_THREADS"
+C_INCLUDE_PATH="$C_INCLUDE_PATH:$AD_LIBPNG/build/include:$AD_LIBJPG/build/include" LIBRARY_PATH="$LIBRARY_PATH:$AD_LIBPNG/build/$AD_EXEC/lib:$AD_ZLIB/build/$AD_EXEC/lib:$AD_LIBJPG/build/$AD_EXEC/lib" $AD_MAKE CONFIG_APPLE=y prefix="build/$AD_EXEC" LIBS=-lz -j"$AD_THREADS"
 CheckStatus "libbpg"
+$AD_MAKE install
 cd $BASEDIR/temp
 EndBuild $AD_LIBBPG
+
+#libcurl
+#openssl
+#ffmpeg
+
+
+
+BuildAll()
+{
+  STATIC=$1
+  ARCH=$2
+  PROFILE=$3
+  LICENSE=$4
+  
+  BuildZlib($STATIC, $ARCH)
+}
+
+BuildLicense()
+{
+  BuildAll($1, $2, $3, free)
+  BuildAll($1, $2, $3, lgpl)
+  BuildAll($1, $2, $3, gpl)
+}
+
+BuildProfile()
+{
+  BuildLicense($1, $2, release)
+  BuildLicense($1, $2, debug)
+}
+
+
+BuildLib()
+{
+  BuildArch(static, $1)
+  BuildArch(shared, $1)
+}
+
+BuildLib($AD_ARCH)
+
 
