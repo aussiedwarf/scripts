@@ -89,6 +89,14 @@ case "$AD_OS" in
               AD_MAKE=make
               AD_AR=libtool
               ;;
+  linux )     AD_ARCH=x64
+              AD_COMPILER=gcc
+              AD_PROFILE=release
+              AD_CC=gcc
+              AD_CXX=g++
+              AD_MAKE=make
+              AD_AR=libtool
+              ;;
 esac
 
 
