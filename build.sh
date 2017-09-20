@@ -42,8 +42,6 @@ AD_BZIP="$AD_DIR/$AD_BZIP_DIR"
 AD_THREADS=1
 #AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
 
-USE_GPL=false
-
 lowercase(){
     echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
 }
@@ -119,6 +117,7 @@ Usage ()
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
+AD_CFLAGS_DEBUG = "-D_FILE_OFFSET_BITS=64 -Wall -Og -g"
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
@@ -169,8 +168,10 @@ StartBuild()
     mkdir temp
     cd temp
     #remove previous build
-    echo "Removing $1/build/$AD_EXEC"
-    rm -rf "$1/build/$AD_EXEC"
+    #echo "Removing $1/build/$AD_EXEC"
+    echo "Removing $1/build/$3"
+    #rm -rf "$1/build/$AD_EXEC"
+    rm -rf "$1/build/$3"
     #copy builds with other settings
     echo "Copying $1/build TO $TEMPDIR/build"
     cp -a "$1/build" "$TEMPDIR/build"
@@ -195,32 +196,38 @@ CheckStatus()
   fi
 }
 
-if false
-then
+
 
 #Build* functions take 2, sometime 3 parameters
-#$1 is "static" or "shared"
-#$2 is the arch, "x86", "x64", emscripten, arm, etc
-#$3 is profile debug or release
-#$4 is license, free, lgpl, gpl when needed
+#$1 install directory
+#$2 is "static" or "shared"
+#$3 is the arch, "x86", "x64", emscripten, arm, etc
+#$4 is profile debug or release
+#$5 is license, free, lgpl, gpl when needed
 
 #zlib license
 #https://zlib.net/
-BuildZLib()
+BuildZlib()
 {
-  if [ $4 eq "free" ] then
+  if [ $5 = "free" ]; then
     echo "Building zlib"
-    StartBuild $AD_ZLIB $AD_ZLIB_DIR
-  
+    
     STATIC=""
-    if [$1 eq "static"] then
+    if [ $2 = "static" ]; then
       STATIC="--static"
     fi
+    
+    CFLAGS=$AD_CFLAGS
+    if [ $4 = "debug" ]; then
+      CFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
   
-    $AD_ZLIB/./configure $STATIC --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$AD_EXEC
+    $AD_ZLIB/./configure $STATIC --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$1
   
     CheckStatus "Zlib"
-    $AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
+    $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
     CheckStatus "Zlib"
     $AD_MAKE install
     EndBuild $AD_ZLIB
@@ -228,7 +235,8 @@ BuildZLib()
 }
 
 
-
+if false
+then
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
@@ -460,7 +468,7 @@ CheckStatus "SDL2_net"
 $AD_MAKE install
 EndBuild $AD_SDL2_NET
 
-fi
+
 
 #combiniation of lgpl and gpl
 #depends on libpng, zlib, sdl
@@ -473,6 +481,8 @@ CheckStatus "libbpg"
 $AD_MAKE install
 cd $BASEDIR/temp
 EndBuild $AD_LIBBPG
+
+fi
 
 #libcurl
 #openssl
@@ -487,29 +497,42 @@ BuildAll()
   PROFILE=$3
   LICENSE=$4
   
-  BuildZlib($STATIC, $ARCH)
+  EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE
+  
+  BuildZlib $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
 }
 
 BuildLicense()
 {
-  BuildAll($1, $2, $3, free)
-  BuildAll($1, $2, $3, lgpl)
-  BuildAll($1, $2, $3, gpl)
+  echo "Building Permissive libs"
+  BuildAll $1 $2 $3 "free"
+  
+  echo "Building LGPL libs"
+  BuildAll $1 $2 $3 "lgpl"
+  
+  echo "Building GPL libs"
+  BuildAll $1 $2 $3 "gpl"
 }
 
 BuildProfile()
 {
-  BuildLicense($1, $2, release)
-  BuildLicense($1, $2, debug)
+  echo "Building Release libs"
+  BuildLicense $1 $2 "release"
+  
+  echo "Building Debug libs"
+  BuildLicense $1 $2 "debug"
 }
 
 
 BuildLib()
 {
-  BuildArch(static, $1)
-  BuildArch(shared, $1)
+  echo "Building Static libs"
+  BuildProfile "static" $1
+  
+  echo "Building Shared libs"
+  BuildProfile "shared" $1
 }
 
-BuildLib($AD_ARCH)
+BuildLib $AD_ARCH
 
 
