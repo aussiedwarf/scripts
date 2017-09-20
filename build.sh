@@ -42,6 +42,27 @@ AD_BZIP="$AD_DIR/$AD_BZIP_DIR"
 AD_THREADS=1
 #AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
 
+
+#script will build all libs unless specifically told to build a library. It will then only
+#build said library(s)
+AD_BUILD_ALL=true
+AD_BUILD_ZLIB=false
+AD_BUILD_LIBPNG=false
+AD_BUILD_LIBJPEG=false
+
+SetBuild()
+{
+  echo "Set Build $1"
+  AD_BUILD_ALL=false
+  
+  case $1 in
+    zlib )    AD_BUILD_ZLIB=true;;
+    libpng )  AD_BUILD_LIBPNG=true;;
+    libjpeg ) AD_BUILD_LIBJPEG=true;;
+  esac
+}
+
+
 lowercase(){
     echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
 }
@@ -81,6 +102,9 @@ echo "Currently in $TEMPDIR"
 
 while [ "$1" != "" ]; do
     case $1 in
+        -b | --build )          shift
+                                SetBuild $1
+                                ;;
         -d | --directory )      shift
                                 AD_DIR=$1
                                 ;;
@@ -235,37 +259,85 @@ BuildZlib()
 }
 
 
-if false
-then
+
 
 #libPNG license (permissive)
 #http://www.libpng.org/pub/png/libpng.html
 #requires zlib
-echo "Building libpng"
-StartBuild $AD_LIBPNG $AD_LIBPNG_DIR
-#need to copy folder as ./configure does not copy
+BuildLibpng()
+{
+  if [ "$5" = "free" ]; then
+    echo "Building libpng"
+    
+    CFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      CFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    STATIC="--disable-static"
+    SHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      STATIC="--enable-static"
+    else
+      SHARED="--enable-shared"
+    fi
+    
+    SSE=""
+    
+    if [ "$3" = "x86" ] || [ "$3" = "x64" ]
+    then
+      SSE="--enable-intel-sse"
+    fi
+    
+    
+    StartBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
+    #need to copy folder as ./configure does not copy
 
-$AD_LIBPNG/./configure CFLAGS="$AD_CFLAGS" --enable-intel-sse --disable-shared --enable-static LDFLAGS=-L$AD_ZLIB/build/$AD_EXEC/lib --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$AD_EXEC CPPFLAGS="-I$AD_ZLIB/build/include" CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "libpng"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "libpng"
-$AD_MAKE install
-EndBuild $AD_LIBPNG
-
+    $AD_LIBPNG/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB/build/$1/lib --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$1 CPPFLAGS="-I$AD_ZLIB/build/include" CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "libpng"
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "libpng"
+    $AD_MAKE install
+    EndBuild $AD_LIBPNG
+  fi
+}
 
 
 #IJG libjpg
 #Wikipedia says BSD like
 #http://www.ijg.org/
 #https://sourceforge.net/projects/libjpeg/
-echo "Building libjpeg"
-StartBuild $AD_LIBJPG $AD_LIBJPG_DIR
-$AD_LIBJPG/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBJPG/build --exec-prefix=$AD_LIBJPG/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "libjpeg"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "libjpeg"
-$AD_MAKE install
-EndBuild $AD_LIBJPG
+BuildLibjpeg()
+{
+  if [ "$5" = "free" ]; then
+    echo "Building libjpeg"
+    
+    CFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      CFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    STATIC="--disable-static"
+    SHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      STATIC="--enable-static"
+    else
+      SHARED="--enable-shared"
+    fi
+    
+    StartBuild $AD_LIBJPG $AD_LIBJPG_DIR $1
+    
+    $AD_LIBJPG/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG/build --exec-prefix=$AD_LIBJPG/build/$1 CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "libjpeg"
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "libjpeg"
+    $AD_MAKE install
+    EndBuild $AD_LIBJPG
+  fi
+}
+
+if false
+then
 
 
 
@@ -498,8 +570,21 @@ BuildAll()
   LICENSE=$4
   
   EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_ZLIB" = true ]
+  then
+    BuildZlib $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+  fi
   
-  BuildZlib $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBPNG" = true ]
+  then
+    BuildLibpng $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+  fi
+  
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBJPEG" = true ]
+  then
+    BuildLibjpeg $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+  fi
 }
 
 BuildLicense()
@@ -533,6 +618,7 @@ BuildLib()
   BuildProfile "shared" $1
 }
 
+echo "$AD_BUILD_ALL"
 BuildLib $AD_ARCH
 
 
