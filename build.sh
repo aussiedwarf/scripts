@@ -317,7 +317,8 @@ BuildLibpng()
     
     STATIC="--disable-static"
     SHARED="--disable-shared"
-    if [ $2 = "static" ]; then
+    
+    if [ "$2" = "static" ]; then
       STATIC="--enable-static"
     else
       SHARED="--enable-shared"
@@ -605,32 +606,35 @@ fi
 #ffmpeg
 
 
-
+#STATIC=$1
+#ARCH=$2
+#PROFILE=$3
+#LICENSE=$4
 BuildAll()
 {
-  STATIC=$1
-  ARCH=$2
-  PROFILE=$3
-  LICENSE=$4
+
   
   EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE-$STATIC
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_ZLIB" = true ]
   then
-    BuildZlib $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+    BuildZlib $EXEC_DIR $1 $2 $3 $4
   fi
   
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBPNG" = true ]
   then
-    BuildLibpng $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+    BuildLibpng $EXEC_DIR $1 $2 $3 $4
   fi
   
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBJPEG" = true ]
   then
-    BuildLibjpeg $EXEC_DIR $STATIC $ARCH $PROFILE $LICENSE
+    BuildLibjpeg $EXEC_DIR $1 $2 $3 $4
   fi
 }
 
+# $1 static/shared
+# $2 arch
+# $3 release/debug
 BuildLicense()
 {
   echo "Building Permissive libs"
@@ -643,6 +647,8 @@ BuildLicense()
   BuildAll $1 $2 $3 "gpl"
 }
 
+# $1 static/shared
+# $2 arch
 BuildProfile()
 {
   echo "Building Release libs"
@@ -652,7 +658,7 @@ BuildProfile()
   BuildLicense $1 $2 "debug"
 }
 
-
+# $1 arch
 BuildLib()
 {
   echo "Building Static libs"
