@@ -1,25 +1,35 @@
 #!/bin/sh
 
+mkdir thirdparty
+
 #zlib
 #https://zlib.net/
 #SHA-256 hash 4ff941449631ace0d4d203e3483be9dbc9da454084111f97ea0a2114e19bf066
-wget -O thirdparty/zlib/zlib-1.2.11.tar.xz https://zlib.net/zlib-1.2.11.tar.xz 
-tar -xf thirdparty/zlib/zlib-1.2.11.tar.xz -C thirdparty/zlib/
+mkdir thirdparty/zlib/
 
-if false
-then
+if [ ! -f thirdparty/zlib/zlib-1.2.11.tar.xz ]; then
+  wget -O thirdparty/zlib/zlib-1.2.11.tar.xz https://zlib.net/zlib-1.2.11.tar.xz 
+  tar -xf thirdparty/zlib/zlib-1.2.11.tar.xz -C thirdparty/zlib/
+fi
 
 #libpng
 #http://www.libpng.org/pub/png/libpng.html
 #md5 e01be057a9369183c959b793a685ad15
-wget -O thirdparty/libpng/libpng-1.6.32.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.32.tar.xz
-tar -xf thirdparty/libpng/libpng-1.6.32.tar.xz -C thirdparty/libpng/
-
+mkdir thirdparty/libpng
+if [ ! -f thirdparty/libpng/libpng-1.6.32.tar.xz ]; then
+  wget -O thirdparty/libpng/libpng-1.6.32.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.32.tar.xz
+  tar -xf thirdparty/libpng/libpng-1.6.32.tar.xz -C thirdparty/libpng/
+fi
 
 #http://www.ijg.org/
-wget -O thirdparty/libjpeg/jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
-tar -xf thirdparty/libjpeg/jpegsrc.v9b.tar.gz -C thirdparty/libjpeg/
+mkdir thirdparty/libjpeg/
+if [ ! -f thirdparty/libjpeg/jpegsrc.v9b.tar.gz ]; then
+  wget -O thirdparty/libjpeg/jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
+  tar -xf thirdparty/libjpeg/jpegsrc.v9b.tar.gz -C thirdparty/libjpeg/
+fi
 
+if false
+then
 
 #xz
 #https://tukaani.org/xz/
@@ -71,4 +81,6 @@ tar -xf thirdparty/SDL/SDL2_net-2.0.1.tar.gz -C thirdparty/SDL/
 #https://bellard.org/bpg/
 wget -O thirdparty/libbpg/libbpg-0.9.7 https://bellard.org/bpg/libbpg-0.9.7.tar.gz
 tar -xf thirdparty/libbpg/libbpg-0.9.7.tar.gz -C thirdparty/libbpg/
+
+fi
 

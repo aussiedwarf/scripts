@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 #./build.sh -c clang -o ubuntu16.04 -a x64
+
+
 AD_OS=macos
 AD_ARCH=x64
 AD_COMPILER=clang
@@ -8,7 +10,7 @@ AD_CC=gcc
 AD_CXX=g++
 AD_MAKE=make
 AD_AR=libtool
-AD_DIR=~/dev/thirdparty
+AD_DIR=../thirdparty
 AD_SDL2_DIR=SDL/SDL2-2.0.5
 AD_SDL2="$AD_DIR/$AD_SDL2_DIR"
 AD_SDL2_IMAGE_DIR=SDL/SDL2_image-2.0.1
@@ -17,12 +19,7 @@ AD_SDL2_TTF_DIR=SDL/SDL2_ttf-2.0.14
 AD_SDL2_TTF="$AD_DIR/$AD_SDL2_TTF_DIR"
 AD_SDL2_NET_DIR=SDL/SDL2_net-2.0.1
 AD_SDL2_NET="$AD_DIR/$AD_SDL2_NET_DIR"
-AD_ZLIB_DIR=zlib/zlib-1.2.11
-AD_ZLIB="$AD_DIR/$AD_ZLIB_DIR"
-AD_LIBPNG_DIR=libpng/libpng-1.6.29
-AD_LIBPNG="$AD_DIR/$AD_LIBPNG_DIR"
-AD_LIBJPG_DIR=libjpeg/jpeg-9b
-AD_LIBJPG="$AD_DIR/$AD_LIBJPG_DIR"   
+  
 AD_LIBBPG_DIR=libbpg/libbpg-0.9.7
 AD_LIBBPG="$AD_DIR/$AD_LIBBPG_DIR"         
 #AD_JBIGKIT=$AD_DIR/
@@ -41,6 +38,9 @@ AD_BZIP_DIR=bzip2/bzip2-1.0.6
 AD_BZIP="$AD_DIR/$AD_BZIP_DIR"
 AD_THREADS=1
 #AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
+
+
+
 
 
 #script will build all libs unless specifically told to build a library. It will then only
@@ -71,13 +71,16 @@ AD_FULL_OS=`lowercase \`uname\``
 AD_KERNEL=`uname -r`
 AD_MACH=`uname -m`
 
+
+
+#This does not work in !/bin/sh on ubuntu so use bash instead 
 case "$OSTYPE" in
-  solaris*) AD_OS="solaris" ;;
-  darwin*)  AD_OS="macos" ;; 
-  linux*)   AD_OS="linux" ;;
-  bsd*)     AD_OS="bsd" ;;
-  msys*)    AD_OS="msys" ;;
-  *)        AD_OS="unknown" ;;
+  solaris* ) AD_OS="solaris" ;;
+  darwin* )  AD_OS="macos" ;; 
+  linux* )   AD_OS="linux" ;;
+  bsd* )     AD_OS="bsd" ;;
+  msys* )    AD_OS="msys" ;;
+  * )        AD_OS="unknown" ;;
 esac
 
 case "$AD_OS" in
@@ -95,7 +98,7 @@ case "$AD_OS" in
               AD_CC=gcc
               AD_CXX=g++
               AD_MAKE=make
-              AD_AR=libtool
+              AD_AR=ar
               ;;
 esac
 
@@ -103,6 +106,22 @@ esac
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMPDIR="${BASEDIR}/temp"
 
+#Get abs path to dest directory
+cd $AD_DIR
+AD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $BASEDIR
+
+AD_ZLIB_DIR=zlib-1.2.11
+AD_ZLIB=zlib
+AD_ZLIB_FULL="$AD_DIR/$AD_ZLIB/$AD_ZLIB_DIR"
+
+AD_LIBPNG_DIR=libpng-1.6.32
+AD_LIBPNG=libpng
+AD_LIBPNG_FULL="$AD_DIR/$AD_LIBPNG/$AD_LIBPNG_DIR"
+
+AD_LIBJPG_DIR=jpeg-9b
+AD_LIBJPG=libjpeg 
+AD_LIBJPG_FULL="$AD_DIR/$AD_LIBJPG/$AD_LIBJPG_DIR"
 
 echo "Running script from $BASEDIR"
 echo "Currently in $TEMPDIR"
@@ -149,7 +168,7 @@ Usage ()
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
-AD_CFLAGS_DEBUG = "-D_FILE_OFFSET_BITS=64 -Wall -Og -g"
+AD_CFLAGS_DEBUG="-D_FILE_OFFSET_BITS=64 -Wall -Og -g"
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
@@ -192,25 +211,36 @@ echo "Thirdparty directory: $AD_DIR"
 echo "THREADS: $AD_THREADS"
 echo "AR: $AD_AR"
  
-#mac warns to not use -ra for cp
+# mac warns to not use -ra for cp
+# $1 library name
+# $2 folder version name
+# $3 exec directory
 StartBuild()
 {
+
     #Remove previous temp  dir and create new one to hold builds for other systems
     rm -rf temp
     mkdir temp
     cd temp
     #remove previous build
-    #echo "Removing $1/build/$AD_EXEC"
-    echo "Removing $1/build/$3"
-    #rm -rf "$1/build/$AD_EXEC"
-    rm -rf "$1/build/$3"
+    #echo "Removing $1/build/$3"
+    echo "Removing $AD_DIR/$1/$2/build/$3"
+    #rm -rf "$1/build/$3"
+    rm -rf "$AD_DIR/$1/$2/build/$3"
     #copy builds with other settings
-    echo "Copying $1/build TO $TEMPDIR/build"
-    cp -a "$1/build" "$TEMPDIR/build"
-    echo "Removing $1"
-    rm -rf "$1"
-    echo "Copying $BASEDIR/thirdparty/$2 TO $1"
-    cp -a "$BASEDIR/thirdparty/$2" "$1"
+    #echo "Copying $1/build TO $TEMPDIR/build"
+    echo "Copying $AD_DIR/$1/$2/build TO $TEMPDIR/build"
+    #cp -a "$1/build" "$TEMPDIR/build"
+    cp -a "$AD_DIR/$1/$2/build" "$TEMPDIR/build"
+    #echo "Removing $1"
+    echo "Removing $AD_DIR/$1/$2"
+    #rm -rf "$1"
+    rm -rf "$AD_DIR/$1/$2"
+    #echo "Copying $BASEDIR/thirdparty/$2 TO $1"
+    echo "Copying $BASEDIR/thirdparty/$1/$2 TO $AD_DIR/$1/"
+    #test -d "$1" || mkdir -p "$1" && cp -a "$BASEDIR/thirdparty/$2" "$1"
+    test -d "$AD_DIR/$1" || mkdir -p "$AD_DIR/$1" && cp -a "$BASEDIR/thirdparty/$1/$2" "$AD_DIR/$1"
+    
 }
 
 EndBuild()
@@ -255,14 +285,14 @@ BuildZlib()
     fi
     
     StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
-  
-    $AD_ZLIB/./configure $STATIC --prefix=$AD_ZLIB/build --eprefix=$AD_ZLIB/build/$1
+    
+    $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1
   
     CheckStatus "Zlib"
     $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
     CheckStatus "Zlib"
     $AD_MAKE install
-    EndBuild $AD_ZLIB
+    EndBuild "$AD_ZLIB_FULL"
   fi
 }
 
@@ -300,13 +330,16 @@ BuildLibpng()
     
     StartBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
     #need to copy folder as ./configure does not copy
-
-    $AD_LIBPNG/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB/build/$1/lib --prefix=$AD_LIBPNG/build --exec-prefix=$AD_LIBPNG/build/$1 CPPFLAGS="-I$AD_ZLIB/build/include" CC="$AD_CC" CXX="$AD_CXX"
+    
+    
+    echo CONFIGURE CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
+    
+    $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
     CheckStatus "libpng"
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "libpng"
     $AD_MAKE install
-    EndBuild $AD_LIBPNG
+    EndBuild $AD_LIBPNG_FULL
   fi
 }
 
@@ -335,12 +368,12 @@ BuildLibjpeg()
     
     StartBuild $AD_LIBJPG $AD_LIBJPG_DIR $1
     
-    $AD_LIBJPG/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG/build --exec-prefix=$AD_LIBJPG/build/$1 CC="$AD_CC" CXX="$AD_CXX"
+    $AD_LIBJPG_FULL/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG_FULL/build --exec-prefix=$AD_LIBJPG_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX"
     CheckStatus "libjpeg"
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "libjpeg"
     $AD_MAKE install
-    EndBuild $AD_LIBJPG
+    EndBuild $AD_LIBJPG_FULL
   fi
 }
 
@@ -577,7 +610,7 @@ BuildAll()
   PROFILE=$3
   LICENSE=$4
   
-  EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE
+  EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE-$STATIC
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_ZLIB" = true ]
   then
