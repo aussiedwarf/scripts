@@ -168,7 +168,7 @@ Usage ()
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
-AD_CFLAGS_DEBUG="-D_FILE_OFFSET_BITS=64 -Wall -Og -g"
+AD_CFLAGS_DEBUG="-D_FILE_OFFSET_BITS=64 -Wall -g"
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
@@ -177,12 +177,15 @@ then
     AD_CFLAGS="$AD_CFLAGS -frename-registers"
     AD_CC="gcc"
     AD_CXX="g++"
+    AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -Og"
 fi
 
 if [ "$AD_COMPILER" = "clang" ]
 then
     AD_CC="clang"
     AD_CXX="clang++"
+    #Clang 3.8 does not accept -O0 on ubuntu 16.04
+    AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -O0"
 fi
 
 if [ "$AD_COMPILER" = "emscripten" ]
