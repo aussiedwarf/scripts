@@ -10,6 +10,7 @@ AD_CC=gcc
 AD_CXX=g++
 AD_MAKE=make
 AD_AR=libtool
+AD_LD=ld
 AD_DIR=../thirdparty
 AD_SDL2_DIR=SDL/SDL2-2.0.5
 AD_SDL2="$AD_DIR/$AD_SDL2_DIR"
@@ -83,6 +84,13 @@ case "$OSTYPE" in
   * )        AD_OS="unknown" ;;
 esac
 
+#check for WSL
+if [ AD_OS="linux" ] ; then
+  if grep -q Microsoft /proc/version; then
+    AD_OS="windows"
+  fi
+fi
+
 case "$AD_OS" in
    macos )    AD_ARCH=x64
               AD_COMPILER=clang
@@ -100,28 +108,20 @@ case "$AD_OS" in
               AD_MAKE=make
               AD_AR=ar
               ;;
+  windows )   AD_ARCH=x64
+              AD_COMPILER=msvc14
+              AD_PROFILE=release
+              AD_CC=cl.exe
+              AD_CXX=cl.exe
+              AD_MAKE=make
+              AD_AR=link.exe
 esac
 
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMPDIR="${BASEDIR}/temp"
 
-#Get abs path to dest directory
-cd $AD_DIR
-AD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $BASEDIR
 
-AD_ZLIB_DIR=zlib-1.2.11
-AD_ZLIB=zlib
-AD_ZLIB_FULL="$AD_DIR/$AD_ZLIB/$AD_ZLIB_DIR"
-
-AD_LIBPNG_DIR=libpng-1.6.32
-AD_LIBPNG=libpng
-AD_LIBPNG_FULL="$AD_DIR/$AD_LIBPNG/$AD_LIBPNG_DIR"
-
-AD_LIBJPG_DIR=jpeg-9b
-AD_LIBJPG=libjpeg 
-AD_LIBJPG_FULL="$AD_DIR/$AD_LIBJPG/$AD_LIBJPG_DIR"
 
 echo "Running script from $BASEDIR"
 echo "Currently in $TEMPDIR"
@@ -130,6 +130,7 @@ echo "Currently in $TEMPDIR"
 while [ "$1" != "" ]; do
     case $1 in
         -b | --build )          shift
+                                echo "build: $1"
                                 SetBuild $1
                                 ;;
         -d | --directory )      shift
@@ -142,6 +143,7 @@ while [ "$1" != "" ]; do
                                 AD_ARCH=$1
                                 ;;
         -c | --compiler )       shift
+                                echo "compiler: $1"
                                 AD_COMPILER=$1
                                 ;;
         -p | --profile )        shift
@@ -164,6 +166,26 @@ Usage ()
     echo "Usage: [[[-f file ] [-i]] | [-h]] "
 }
 
+#Get abs path to dest directory
+echo "Thirdparty directory: $AD_DIR"
+test -d "$AD_DIR" || mkdir -p "$AD_DIR" && cd $AD_DIR
+AD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $BASEDIR
+
+echo "Thirdparty directory: $AD_DIR"
+
+AD_ZLIB_DIR=zlib-1.2.11
+AD_ZLIB=zlib
+AD_ZLIB_FULL="$AD_DIR/$AD_ZLIB/$AD_ZLIB_DIR"
+
+AD_LIBPNG_DIR=libpng-1.6.32
+AD_LIBPNG=libpng
+AD_LIBPNG_FULL="$AD_DIR/$AD_LIBPNG/$AD_LIBPNG_DIR"
+
+AD_LIBJPG_DIR=jpeg-9b
+AD_LIBJPG=libjpeg 
+AD_LIBJPG_FULL="$AD_DIR/$AD_LIBJPG/$AD_LIBJPG_DIR"
+
 
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
@@ -177,6 +199,16 @@ then
     AD_CFLAGS="$AD_CFLAGS -frename-registers"
     AD_CC="gcc"
     AD_CXX="g++"
+    AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -Og"
+fi
+
+if [ "$AD_COMPILER" = "mingw" ]
+then
+    AD_CFLAGS="$AD_CFLAGS -frename-registers"
+    AD_CC="translate.sh gcc.exe"
+    AD_CXX="translate.sh g++.exe"
+    AD_AR="translate.sh ar.exe"
+    AD_LD="translate.sh ld.exe"
     AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -Og"
 fi
 
@@ -201,6 +233,12 @@ fi
 if [ "$AD_ARCH" = "x64" ] || [ "$AD_ARCH" = "x86" ]
 then
    AD_CFLAGS="$AD_CFLAGS -mfpmath=sse -msse -msse2 -msse3 -mssse3"
+fi
+
+if [ "$AD_COMPILER" = "msvc*" ]
+then
+  AD_CFLAGS="/O2"
+  AD_CFLAGS_DEBUG="/Od"
 fi
 
 echo "CFLAGS: $AD_CFLAGS"
@@ -277,25 +315,43 @@ BuildZlib()
   if [ $5 = "free" ]; then
     echo "Building zlib"
     
-    STATIC=""
-    if [ $2 = "static" ]; then
-      STATIC="--static"
+    echo $AD_COMPILER
+    echo $AD_ZLIB_FULL
+    echo $AD_ZLIB
+    echo $AD_ZLIB_DIR
+    echo $1
+    echo $2
+    echo $3
+    echo $4
+    echo $5
+    echo $AD_CC
+    
+    if [ "$AD_COMPILER" = "msvc*" ]
+    then
+      msbuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln
+    else
+    
+      STATIC=""
+      if [ $2 = "static" ]; then
+        STATIC="--static"
+      fi
+      
+      CFLAGS=$AD_CFLAGS
+      if [ $4 = "debug" ]; then
+        CFLAGS=$AD_CFLAGS_DEBUG
+      fi
+      
+      StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
+      
+      CC="$AD_CC" $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1
+    
+      CheckStatus "Zlib"
+      echo Make
+      $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" LD="$AD_CC"
+      CheckStatus "Zlib"
+      $AD_MAKE install
+      EndBuild "$AD_ZLIB_FULL"
     fi
-    
-    CFLAGS=$AD_CFLAGS
-    if [ $4 = "debug" ]; then
-      CFLAGS=$AD_CFLAGS_DEBUG
-    fi
-    
-    StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
-    
-    $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1
-  
-    CheckStatus "Zlib"
-    $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS"
-    CheckStatus "Zlib"
-    $AD_MAKE install
-    EndBuild "$AD_ZLIB_FULL"
   fi
 }
 
@@ -310,40 +366,51 @@ BuildLibpng()
   if [ "$5" = "free" ]; then
     echo "Building libpng"
     
-    CFLAGS=$AD_CFLAGS
-    if [ "$4" = "debug" ]; then
-      CFLAGS=$AD_CFLAGS_DEBUG
-    fi
+    echo $AD_COMPILER
     
-    STATIC="--disable-static"
-    SHARED="--disable-shared"
-    
-    if [ "$2" = "static" ]; then
-      STATIC="--enable-static"
-    else
-      SHARED="--enable-shared"
-    fi
-    
-    SSE=""
-    
-    if [ "$3" = "x86" ] || [ "$3" = "x64" ]
+    if [ "$AD_COMPILER"="msvc*" ]
     then
-      SSE="--enable-intel-sse"
+    
+      msbuild.exe $AD_LIBPNG_FULL/contrib/vstudio/vc14/zlibvc.sln
+    
+    else
+    
+      CFLAGS=$AD_CFLAGS
+      if [ "$4" = "debug" ]; then
+        CFLAGS=$AD_CFLAGS_DEBUG
+      fi
+    
+      STATIC="--disable-static"
+      SHARED="--disable-shared"
+      
+      if [ "$2" = "static" ]; then
+        STATIC="--enable-static"
+      else
+        SHARED="--enable-shared"
+      fi
+      
+      SSE=""
+      
+      if [ "$3" = "x86" ] || [ "$3" = "x64" ]
+      then
+        SSE="--enable-intel-sse"
+      fi
+      
+      
+      StartBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
+      #need to copy folder as ./configure does not copy
+      
+      
+      echo CONFIGURE CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
+      
+      $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "libpng"
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "libpng"
+      $AD_MAKE install
+      EndBuild $AD_LIBPNG_FULL
+    
     fi
-    
-    
-    StartBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
-    #need to copy folder as ./configure does not copy
-    
-    
-    echo CONFIGURE CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
-    
-    $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX"
-    CheckStatus "libpng"
-    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-    CheckStatus "libpng"
-    $AD_MAKE install
-    EndBuild $AD_LIBPNG_FULL
   fi
 }
 
@@ -614,7 +681,7 @@ BuildAll()
 {
 
   
-  EXEC_DIR=$AD_OS/$AD_COMPILER/$ARCH/$PROFILE-$STATIC
+  EXEC_DIR=$AD_OS/$AD_COMPILER/$2/$3-$1
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_ZLIB" = true ]
   then
