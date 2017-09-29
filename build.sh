@@ -1,5 +1,23 @@
 #!/bin/bash
+set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
+#./build.sh -j 8 -c mingw -b zlib 2>&1 | tee -a output.log
+#
+# static          static lib linked to static libs
+# shared_all      shared lib linked to shared libs
+# shared_static   shared lib linked to static libs
+#
+# Delete already compiled build
+# Copy other builds to temp
+# Delete Dest
+# Copy Source to Dest
+# Goto Dest
+# Build Dest
+# Copy build to temp
+# Delete Dest
+# Copy source to Dest
+# copy temp to dest
+# Gotostart
 
 
 AD_OS=macos
@@ -10,7 +28,10 @@ AD_CC=gcc
 AD_CXX=g++
 AD_MAKE=make
 AD_AR=libtool
+AD_AS=as
 AD_LD=ld
+AD_RC=rc
+AD_STRIP=strip
 AD_DIR=../thirdparty
 AD_SDL2_DIR=SDL/SDL2-2.0.5
 AD_SDL2="$AD_DIR/$AD_SDL2_DIR"
@@ -209,6 +230,9 @@ then
     AD_CXX="translate.sh g++.exe"
     AD_AR="translate.sh ar.exe"
     AD_LD="translate.sh ld.exe"
+    AD_STRIP="translate.sh strip.exe"
+    AD_AS="translate.sh as.exe"
+    AD_RC="translate.sh windres.exe"
     AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -Og"
 fi
 
@@ -256,7 +280,7 @@ echo "AR: $AD_AR"
 # $1 library name
 # $2 folder version name
 # $3 exec directory
-StartBuild()
+StartBuild2()
 {
 
     #Remove previous temp  dir and create new one to hold builds for other systems
@@ -284,10 +308,40 @@ StartBuild()
     
 }
 
+StartBuild()
+{
+  #Remove previous temp  dir and create new one to hold builds for other systems
+    rm -rf temp
+    mkdir temp
+    cd temp
+    
+    #remove previous build
+    rm -rf "$AD_DIR/$1/$2/build/$3"
+    #copy builds with other settings
+    echo "Copying $AD_DIR/$1/$2/build TO $TEMPDIR/build"
+    mv "$AD_DIR/$1/$2/build" "$TEMPDIR"
+    
+    echo "Removing $AD_DIR/$1/$2"
+    rm -rf "$AD_DIR/$1/$2"
+    
+    echo "Copying $BASEDIR/thirdparty/$1/$2 TO $AD_DIR/$1/"
+    test -d "$AD_DIR/$1" || mkdir -p "$AD_DIR/$1" && cp -a "$BASEDIR/thirdparty/$1/$2" "$AD_DIR/$1"
+    
+    cd "$AD_DIR/$1/$2"
+}
+
+
 EndBuild()
 {
-    echo "Copying $TEMPDIR/build TO $1"
-    cp -a "$TEMPDIR/build" "$1"
+    test -d "$TEMPDIR/build/$3" || mkdir -p "$TEMPDIR/build/$3" && mv "$AD_DIR/$1/$2/build/$3" "$TEMPDIR/build/$3/../"
+    
+    rm -rf "$AD_DIR/$1/$2"
+    
+    echo "Copying $BASEDIR/thirdparty/$1/$2 TO $AD_DIR/$1/"
+    test -d "$AD_DIR/$1" || mkdir -p "$AD_DIR/$1" && cp -a "$BASEDIR/thirdparty/$1/$2" "$AD_DIR/$1"
+    
+    mv "$TEMPDIR/build" "$AD_DIR/$1/$2"
+    
     cd $BASEDIR
 }
 
@@ -315,22 +369,11 @@ BuildZlib()
   if [ $5 = "free" ]; then
     echo "Building zlib"
     
-    echo $AD_COMPILER
-    echo $AD_ZLIB_FULL
-    echo $AD_ZLIB
-    echo $AD_ZLIB_DIR
-    echo $1
-    echo $2
-    echo $3
-    echo $4
-    echo $5
-    echo $AD_CC
     
     if [ "$AD_COMPILER" = "msvc*" ]
     then
       msbuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln
     else
-    
       STATIC=""
       if [ $2 = "static" ]; then
         STATIC="--static"
@@ -343,14 +386,32 @@ BuildZlib()
       
       StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
       
-      CC="$AD_CC" $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1
-    
-      CheckStatus "Zlib"
-      echo Make
-      $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" LD="$AD_CC"
-      CheckStatus "Zlib"
-      $AD_MAKE install
-      EndBuild "$AD_ZLIB_FULL"
+      CONFIG_OPT=""
+      if [ $AD_COMPILER = "mingw" ]; then
+        STATIC="SHARED_MODE=0"
+        if [ $2 = "shared" ]; then
+          STATIC="SHARED_MODE=1"
+        fi
+        
+        
+        echo Make
+        $AD_MAKE "-f$AD_ZLIB_FULL/win32/Makefile.gcc" CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" 
+        CheckStatus "Zlib"
+        $AD_MAKE "-fwin32/Makefile.gcc" install DESTDIR="$AD_ZLIB_FULL/build/$1" "$STATIC"
+        
+      else
+
+        CC="$AD_CC" $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1 $CONFIG_OPT
+      
+        CheckStatus "Zlib"
+        echo Make
+        $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" LD="$AD_CC"
+        CheckStatus "Zlib"
+        $AD_MAKE install
+      
+      fi
+      #EndBuild "$AD_ZLIB_FULL"
+      EndBuild $AD_ZLIB $AD_ZLIB_DIR $1
     fi
   fi
 }
@@ -721,7 +782,7 @@ BuildProfile()
   echo "Building Release libs"
   BuildLicense $1 $2 "release"
   
-  echo "Building Debug libs"
+  #echo "Building Debug libs"
   BuildLicense $1 $2 "debug"
 }
 
@@ -731,7 +792,7 @@ BuildLib()
   echo "Building Static libs"
   BuildProfile "static" $1
   
-  echo "Building Shared libs"
+  #echo "Building Shared libs"
   BuildProfile "shared" $1
 }
 
