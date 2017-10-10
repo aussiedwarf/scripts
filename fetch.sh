@@ -28,35 +28,45 @@ if [ ! -f thirdparty/libjpeg/jpegsrc.v9b.tar.gz ]; then
   tar -xf thirdparty/libjpeg/jpegsrc.v9b.tar.gz -C thirdparty/libjpeg/
 fi
 
-if false
-then
-
 #xz
 #https://tukaani.org/xz/
-wget -O thirdparty/xz/xz-5.2.3.tar.xz https://tukaani.org/xz/xz-5.2.3.tar.xz
-tar -xf thirdparty/xz/xz-5.2.3.tar.xz -C thirdparty/xz/
-
+mkdir thirdparty/xz
+if [ ! -f thirdparty/xz/xz-5.2.3.tar.xz ]; then
+  wget -O thirdparty/xz/xz-5.2.3.tar.xz https://tukaani.org/xz/xz-5.2.3.tar.xz
+  tar -xf thirdparty/xz/xz-5.2.3.tar.xz -C thirdparty/xz/
+fi
 
 #libtiff
 #http://www.simplesystems.org/libtiff/
-wget -O thirdparty/libtiff/tiff-4.0.8.tar.gz ftp://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz
-tar -xf thirdparty/libtiff/tiff-4.0.8.tar.gz -C thirdparty/libtiff/
+mkdir thirdparty/libtiff
+if [ ! -f thirdparty/libtiff/tiff-4.0.8.tar.gz ]; then
+  wget -O thirdparty/libtiff/tiff-4.0.8.tar.gz ftp://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz
+  tar -xf thirdparty/libtiff/tiff-4.0.8.tar.gz -C thirdparty/libtiff/
+fi
 
 
 #http://giflib.sourceforge.net/
-wget -O thirdparty/giflib/giflib-5.1.4.tar.bz2 https://downloads.sourceforge.net/project/giflib/giflib-5.1.4.tar.bz2
-tar -xf thirdparty/giflib/giflib-5.1.4.tar.bz2 -C thirdparty/giflib/
-
+mkdir thirdparty/giflib
+if [ ! -f thirdparty/giflib/giflib-5.1.4.tar.bz2 ]; then
+  wget -O thirdparty/giflib/giflib-5.1.4.tar.bz2 https://downloads.sourceforge.net/project/giflib/giflib-5.1.4.tar.bz2
+  tar -xf thirdparty/giflib/giflib-5.1.4.tar.bz2 -C thirdparty/giflib/
+fi
 
 #http://www.bzip.org/
 #md5: 00b516f4704d4a7cb50a1d97e6e8e15b
-wget -O thirdparty/bzip2/bzip2-1.0.6.tar.gz http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
-tar -xf thirdparty/bzip2/bzip2-1.0.6.tar.gz -C thirdparty/bzip2/
+mkdir thirdparty/bzip2
+if [ ! -f thirdparty/bzip2/bzip2-1.0.6.tar.gz ]; then
+  wget -O thirdparty/bzip2/bzip2-1.0.6.tar.gz http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+  tar -xf thirdparty/bzip2/bzip2-1.0.6.tar.gz -C thirdparty/bzip2/
+fi
 
 #https://freetype.org/index.html
 #https://download.savannah.gnu.org/releases/freetype/
-wget -O thirdparty/freetype/freetype-2.8.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.8.1.tar.bz2
-tar -xf thirdparty/freetype/freetype-2.8.1.tar.bz2 -C thirdparty/freetype
+mkdir thirdparty/freetype
+if [ ! -f thirdparty/freetype/freetype-2.8.1.tar.bz2 ]; then
+  wget -O thirdparty/freetype/freetype-2.8.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.8.1.tar.bz2
+  tar -xf thirdparty/freetype/freetype-2.8.1.tar.bz2 -C thirdparty/freetype
+fi
 
 #webp
 git clone https://chromium.googlesource.com/webm/libwebp thirdparty/webp/master
@@ -64,23 +74,33 @@ git clone https://chromium.googlesource.com/webm/libwebp thirdparty/webp/master
 #SDL1
 
 #SDL2
-wget -O thirdparty/SDL/SDL2-2.0.5.tar.gz https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
-tar -xf thirdparty/SDL/SDL2-2.0.5.tar.gz -C thirdparty/SDL/
+mkdir thirdparty/SDL
 
-wget -O thirdparty/SDL/SDL2_image-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
-tar -xf thirdparty/SDL/SDL2_image-2.0.1.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2-2.0.6.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2-2.0.6.tar.gz https://www.libsdl.org/release/SDL2-2.0.6.tar.gz
+  tar -xf thirdparty/SDL/SDL2-2.0.6.tar.gz -C thirdparty/SDL/
+fi
 
-wget -O thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.14.tar.gz
-tar -xf thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_image-2.0.1.tar.gz  ]; then
+  wget -O thirdparty/SDL/SDL2_image-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
+  tar -xf thirdparty/SDL/SDL2_image-2.0.1.tar.gz -C thirdparty/SDL/
+fi
 
-wget -O thirdparty/SDL/SDL2_net-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz
-tar -xf thirdparty/SDL/SDL2_net-2.0.1.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.14.tar.gz
+  tar -xf thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz -C thirdparty/SDL/
+fi
 
+if [ ! -f thirdparty/SDL/SDL2_net-2.0.1.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2_net-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz
+  tar -xf thirdparty/SDL/SDL2_net-2.0.1.tar.gz -C thirdparty/SDL/
+fi
 
 #libbpg
 #https://bellard.org/bpg/
-wget -O thirdparty/libbpg/libbpg-0.9.7 https://bellard.org/bpg/libbpg-0.9.7.tar.gz
-tar -xf thirdparty/libbpg/libbpg-0.9.7.tar.gz -C thirdparty/libbpg/
-
+mkdir thirdparty/libbpg
+if [ ! -f thirdparty/libbpg/libbpg-0.9.7.tar.gz ]; then
+  wget -O thirdparty/libbpg/libbpg-0.9.7.tar.gz https://bellard.org/bpg/libbpg-0.9.7.tar.gz
+  tar -xf thirdparty/libbpg/libbpg-0.9.7.tar.gz -C thirdparty/libbpg/
 fi
 
