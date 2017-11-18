@@ -6,7 +6,18 @@ COMMAND=""
 while [ "$1" != "" ]; do
     if [[ $1 == /mnt/* ]]
     then
-      T=${1:6}
+      T="C:"${1:6}
+      COMMAND="$COMMAND $T"
+    elif [[ $1 == -I/mnt/* ]]
+    then
+      T=-IC:
+      T="$T${1:8}"
+      COMMAND="$COMMAND $T"
+    
+    elif [[ $1 == -L/mnt/* ]]
+    then
+      T=-LC:
+      T="$T${1:8}"
       COMMAND="$COMMAND $T"
     else
       COMMAND="$COMMAND $1"
@@ -15,4 +26,5 @@ while [ "$1" != "" ]; do
     shift
 done
 
+echo "TRANSLATE: $COMMAND"
 $COMMAND
