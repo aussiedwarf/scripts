@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
-#./build.sh -c mingw -b libpng 2>&1 | tee output.log
+#./build.sh -c mingw -b sdl2 2>&1 | tee output.log
 #./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
@@ -664,7 +664,7 @@ BuildLibjpeg()
 
 BuildLibjpegturbo()
 {
-
+  echo building turbo libjpeg
 }
 
 #LZMA
@@ -698,29 +698,91 @@ BuildXz()
 
 }
 
+#permissive
+#http://www.simplesystems.org/libtiff/
+#requires xz, zlib, libjpg
 BuildLibtiff()
 {
+  echo "Building libtiff"
+  StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR
+  $AD_LIBTIFF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIFF/build --exec-prefix=$AD_LIBTIFF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "libtiff"
 
+  #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
+  #--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
+  #unsure of source for libjpeg12
+  #looks to be ijg compiled again for 12bit but may need modifiedtiff and jpeg code to not clash
+  #don't need 12bit support
+  #--with-jpeg12-include-dir=DIR location of libjpeg 12bit headers
+  #--with-jpeg12-lib=LIBRARY path to libjpeg 12bit library
+
+  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "libtiff"
+  $AD_MAKE install
+  EndBuild $AD_LIBTIFF
 }
 
+#permissive
+#$AD_LIBWEBP/./autogen.sh
 BuildLibwebp()
 {
 
+  echo "Building libwebp"
+  StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR
+  $AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIFF/build/include --with-tifflibdir=$AD_LIBTIFF/build/$AD_EXEC/lib --with-gifincludedir=$AD_GIFLIB/build/include  --with-giflibdir=$AD_GIFLIB/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "libwebp"
+  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "libwebp"
+  $AD_MAKE install
+  EndBuild $AD_LIBWEBP
 }
 
+#permissive
+#http://giflib.sourceforge.net/
 BuildGiflib()
 {
-
+  echo "Building giflib"
+  StartBuild $AD_GIFLIB $AD_GIFLIB_DIR
+  $AD_GIFLIB/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_GIFLIB/build --exec-prefix=$AD_GIFLIB/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "giflib"
+  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "giflib"
+  $AD_MAKE install
+  EndBuild $AD_GIFLIB
 }
 
+#permissive with advertising
+#https://freetype.org/index.html
+#requires zlib, libpng, bzip2, harfbuzz(currently disabled)
 BuildFreetype()
 {
 
+  echo "Building Freetype"
+  StartBuild $AD_FREETYPE $AD_FREETYPE_DIR
+  $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "Freetype"
+  #Adding cc and cxx here causes freetype to not compile
+  $AD_MAKE -j"$AD_THREADS"
+  CheckStatus "Freetype"
+  $AD_MAKE install
+  EndBuild $AD_FREETYPE
 }
 
+#permissive
+#http://www.bzip.org/
 BuildBzip()
 {
 
+  echo "Building bzip2"
+
+  StartBuild $AD_BZIP $AD_BZIP_DIR
+
+  cd $AD_BZIP
+  $AD_MAKE clean
+  $AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "bzip2"
+  $AD_MAKE install -f $AD_BZIP/Makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
+  EndBuild $AD_BZIP
 }
 
 #combiniation of lgpl and gpl
@@ -758,7 +820,12 @@ BuildSDL2()
     
       StartBuild $AD_SDL2 $AD_SDL2_DIR $1
       
-      $AD_SDL2_FULL/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+      TCFLAGS=$AD_CFLAGS
+      if [ "$4" = "debug" ]; then
+        TCFLAGS=$AD_CFLAGS_DEBUG
+      fi
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -775,19 +842,75 @@ BuildSDL2()
   fi
 }
 
+#permissive
+#compile error in config https://github.com/Linuxbrew/legacy-linuxbrew/issues/172
+#seems to use sdl lib location for webp
+
 BuildSdl2Image()
 {
 
+  echo "Building SDL2_image"
+  #cd $AD_SDL2_IMAGE
+  StartBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR
+
+  if [ $AD_OS = "macos" ]
+  then
+      $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "SDL2_image"
+      $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "SDL2_image"
+
+
+  else
+
+      $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib -L$AD_XZ/build/$AD_EXEC/lib" CPPFLAGS="-I$AD_LIBWEBP/build/include -I$AD_LIBTIFF/build/include -I$AD_GIFLIB/build/include -I$AD_LIBJPG/build/include -I$AD_SDL2/build/include -I$AD_LIBPNG/build/include" LIBS="-lSDL2 -llzma -lm" CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "SDL2_image"
+      
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "SDL2_image"
+
+
+  fi
+  make install
+  EndBuild $AD_SDL2_IMAGE
 }
 
 BuildSdl2Ttf()
 {
+  echo "Building SDL2_ttf"
+  StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR
 
+  if [ $AD_OS = "macos" ]
+  then
+
+    $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "SDL2_image"
+    $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "SDL2_image"
+
+  else
+
+    $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "SDL2_image"
+    $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "SDL2_image"
+
+  fi
+
+  $AD_MAKE install
+  EndBuild $AD_SDL2_TTF
 }
 
 BuildSdl2Net()
 {
-
+  echo "Building SDL2_net"
+  StartBuild $AD_SDL2_NET $AD_SDL2_NET_DIR
+  $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "SDL2_net"
+  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "SDL2_net"
+  $AD_MAKE install
+  EndBuild $AD_SDL2_NET
 }
 
 
@@ -796,167 +919,13 @@ then
 
 
 
-
-
-
-#permissive
-#http://www.simplesystems.org/libtiff/
-#requires xz, zlib, libjpg
-echo "Building libtiff"
-StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR
-$AD_LIBTIFF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIFF/build --exec-prefix=$AD_LIBTIFF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "libtiff"
-
-#--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
-#--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
-#unsure of source for libjpeg12
-#looks to be ijg compiled again for 12bit but may need modifiedtiff and jpeg code to not clash
-#don't need 12bit support
-#--with-jpeg12-include-dir=DIR location of libjpeg 12bit headers
-#--with-jpeg12-lib=LIBRARY path to libjpeg 12bit library
-
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "libtiff"
-$AD_MAKE install
-EndBuild $AD_LIBTIFF
-
-
-
-#permissive
-#http://giflib.sourceforge.net/
-echo "Building giflib"
-StartBuild $AD_GIFLIB $AD_GIFLIB_DIR
-$AD_GIFLIB/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_GIFLIB/build --exec-prefix=$AD_GIFLIB/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "giflib"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "giflib"
-$AD_MAKE install
-EndBuild $AD_GIFLIB
-
-
-
-#permissive
-#http://www.bzip.org/
-echo "Building bzip2"
-
-StartBuild $AD_BZIP $AD_BZIP_DIR
-
-cd $AD_BZIP
-$AD_MAKE clean
-$AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "bzip2"
-$AD_MAKE install -f $AD_BZIP/Makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
-EndBuild $AD_BZIP
-
-
-
-
-
-
-
-
 #https://www.freedesktop.org/wiki/Software/HarfBuzz/
 #complex package requires ICU flus freetype circular dependency
 #$AD_HARFBUZZ/./configure -h --enable-static
 
-#permissive with advertising
-#https://freetype.org/index.html
-#requires zlib, libpng, bzip2, harfbuzz(currently disabled)
-echo "Building Freetype"
-StartBuild $AD_FREETYPE $AD_FREETYPE_DIR
-$AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "Freetype"
-#Adding cc and cxx here causes freetype to not compile
-$AD_MAKE -j"$AD_THREADS"
-CheckStatus "Freetype"
-$AD_MAKE install
-EndBuild $AD_FREETYPE
-
-
 
 #HARFBUZZ_CFLAGS C compiler flags for HARFBUZZ, overriding pkg-config
 #HARFBUZZ_LIBS linker flags for HARFBUZZ, overriding pkg-config
-
-
-
-#permissive
-#$AD_LIBWEBP/./autogen.sh
-echo "Building libwebp"
-StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR
-$AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIFF/build/include --with-tifflibdir=$AD_LIBTIFF/build/$AD_EXEC/lib --with-gifincludedir=$AD_GIFLIB/build/include  --with-giflibdir=$AD_GIFLIB/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "libwebp"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "libwebp"
-$AD_MAKE install
-EndBuild $AD_LIBWEBP
-
-
-
-#permissive
-#compile error in config https://github.com/Linuxbrew/legacy-linuxbrew/issues/172
-#seems to use sdl lib location for webp
-
-echo "Building SDL2_image"
-#cd $AD_SDL2_IMAGE
-StartBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR
-
-if [ $AD_OS = "macos" ]
-then
-    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX"
-    CheckStatus "SDL2_image"
-    $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-    CheckStatus "SDL2_image"
-
-
-else
-
-    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib -L$AD_XZ/build/$AD_EXEC/lib" CPPFLAGS="-I$AD_LIBWEBP/build/include -I$AD_LIBTIFF/build/include -I$AD_GIFLIB/build/include -I$AD_LIBJPG/build/include -I$AD_SDL2/build/include -I$AD_LIBPNG/build/include" LIBS="-lSDL2 -llzma -lm" CC="$AD_CC" CXX="$AD_CXX"
-    CheckStatus "SDL2_image"
-    
-    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-    CheckStatus "SDL2_image"
-
-
-fi
-make install
-EndBuild $AD_SDL2_IMAGE
-
-
-echo "Building SDL2_ttf"
-StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR
-
-if [ $AD_OS = "macos" ]
-then
-
-  $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "SDL2_image"
-  $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "SDL2_image"
-
-else
-
-  $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "SDL2_image"
-  $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "SDL2_image"
-
-fi
-
-$AD_MAKE install
-EndBuild $AD_SDL2_TTF
-
-
-echo "Building SDL2_net"
-StartBuild $AD_SDL2_NET $AD_SDL2_NET_DIR
-$AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "SDL2_net"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "SDL2_net"
-$AD_MAKE install
-EndBuild $AD_SDL2_NET
-
-
-
 
 
 fi
