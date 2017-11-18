@@ -28,6 +28,13 @@ if [ ! -f thirdparty/libjpeg/jpegsrc.v9b.tar.gz ]; then
   tar -xf thirdparty/libjpeg/jpegsrc.v9b.tar.gz -C thirdparty/libjpeg/
 fi
 
+#https://libjpeg-turbo.org/
+mkdir thirdparty/libjpeg-turbo
+if [ ! -f thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz ]; then
+  wget -O thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.2/libjpeg-turbo-1.5.2.tar.gz
+  tar -xf thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz -C thirdparty/libjpeg-turbo/
+fi
+
 #xz
 #https://tukaani.org/xz/
 mkdir thirdparty/xz
