@@ -2,6 +2,7 @@
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
 #./build.sh -c mingw -b libpng 2>&1 | tee output.log
+#./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
 # shared_all      shared lib linked to shared libs
@@ -35,31 +36,7 @@ AD_STRIP=strip
 AD_DLLTOOL=dlltool
 AD_RANLIB=ranlib
 AD_DIR=../thirdparty
-AD_SDL2_DIR=SDL/SDL2-2.0.5
-AD_SDL2="$AD_DIR/$AD_SDL2_DIR"
-AD_SDL2_IMAGE_DIR=SDL/SDL2_image-2.0.1
-AD_SDL2_IMAGE="$AD_DIR/$AD_SDL2_IMAGE_DIR"
-AD_SDL2_TTF_DIR=SDL/SDL2_ttf-2.0.14
-AD_SDL2_TTF="$AD_DIR/$AD_SDL2_TTF_DIR"
-AD_SDL2_NET_DIR=SDL/SDL2_net-2.0.1
-AD_SDL2_NET="$AD_DIR/$AD_SDL2_NET_DIR"
-  
-AD_LIBBPG_DIR=libbpg/libbpg-0.9.7
-AD_LIBBPG="$AD_DIR/$AD_LIBBPG_DIR"         
-#AD_JBIGKIT=$AD_DIR/
-#~/dev/thirdparty/xz/xz-5.2.3
-AD_XZ_DIR=xz/xz-5.2.3
-AD_XZ="$AD_DIR/$AD_XZ_DIR"
-AD_LIBTIF_DIR=libtiff/tiff-4.0.8
-AD_LIBTIF="$AD_DIR/$AD_LIBTIF_DIR"
-AD_LIBWEBP_DIR=libwebp/libwebp-0.6.0
-AD_LIBWEBP=$AD_DIR/$AD_LIBWEBP_DIR
-AD_LIBGIF_DIR=giflib/giflib-5.1.4
-AD_LIBGIF="$AD_DIR/$AD_LIBGIF_DIR"
-AD_FREETYPE_DIR=freetype/freetype-2.8
-AD_FREETYPE="$AD_DIR/$AD_FREETYPE_DIR"
-AD_BZIP_DIR=bzip2/bzip2-1.0.6
-AD_BZIP="$AD_DIR/$AD_BZIP_DIR"
+
 AD_THREADS=1
 #AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
 
@@ -73,6 +50,20 @@ AD_BUILD_ALL=true
 AD_BUILD_ZLIB=false
 AD_BUILD_LIBPNG=false
 AD_BUILD_LIBJPEG=false
+AD_BUILD_LIBJPEGTURBO=false
+AD_BUILD_XZ=false
+AD_BUILD_LIBTIFF=false
+AD_BUILD_LIBWEBP=false
+AD_BUILD_GIFLIB=false
+AD_BUILD_FREETYPE=false
+AD_BUILD_BZIP=false
+AD_BUILD_LIBBPG=false
+AD_BUILD_SDL2=false
+AD_BUILD_SDL2_IMAGE=false
+AD_BUILD_SDL2_TTF=false
+AD_BUILD_SDL2_NET=false
+
+
 
 SetBuild()
 {
@@ -80,9 +71,21 @@ SetBuild()
   AD_BUILD_ALL=false
   
   case $1 in
-    zlib )    AD_BUILD_ZLIB=true;;
-    libpng )  AD_BUILD_LIBPNG=true;;
-    libjpeg ) AD_BUILD_LIBJPEG=true;;
+    zlib )          AD_BUILD_ZLIB=true;;
+    libpng )        AD_BUILD_LIBPNG=true;;
+    libjpeg )       AD_BUILD_LIBJPEG=true;;
+    libjpegturbo )  AD_BUILD_LIBJPEGTURBO=true;;
+    xz )            AD_BUILD_XZ=true;;
+    libtiff )       AD_BUILD_LIBTIFF=true;;
+    libwebp )       AD_BUILD_LIBWEBP=true;;
+    giflib )        AD_BUILD_GIFLIB=true;;
+    freetype )      AD_BUILD_FREETYPE=true;;
+    bzip )          AD_BUILD_BZIP=true;;
+    libbpg )        AD_BUILD_LIBBPG=true;;
+    sdl2 )          AD_BUILD_SDL2=true;;
+    sdl2_image )    AD_BUILD_SDL2_IMAGE=true;;
+    sdl2_ttf )      AD_BUILD_SDL2_TTF=true;;
+    sdl2_net )      AD_BUILD_SDL2_NET=true;;
   esac
 }
 
@@ -209,7 +212,56 @@ AD_LIBJPG_DIR=jpeg-9b
 AD_LIBJPG=libjpeg 
 AD_LIBJPG_FULL="$AD_DIR/$AD_LIBJPG/$AD_LIBJPG_DIR"
 
+AD_LIBJPGTURBO_DIR=libjpeg-turbo-1.5.2
+AD_LIBJPGTURBO=libjpeg-turbo
+AD_LIBJPGTURBO_FULL="$AD_DIR/$AD_LIBJPGTURBO/$AD_LIBJPGTURBO_DIR"
 
+AD_XZ_DIR=xz-5.2.3
+AD_XZ=xz
+AD_XZ_FULL="$AD_DIR/$AD_XZ/$AD_XZ_DIR"
+
+AD_LIBTIFF_DIR=tiff-4.0.8
+AD_LIBTIFF=libtiff
+AD_LIBTIFF_FULL="$AD_DIR/$AD_LIBTIFF/$AD_LIBTIFF_DIR"
+
+#todo change to version from git
+AD_LIBWEBP_DIR=master
+AD_LIBWEBP=webp
+AD_LIBWEBP_FULL="$AD_DIR/$AD_LIBWEBP/$AD_LIBWEBP_DIR"
+
+AD_GIFLIB_DIR=giflib-5.1.4
+AD_GIFLIB=giflib
+AD_GIFLIB_FULL="$AD_DIR/$AD_GIFLIB/$AD_GIFLIB_DIR"
+
+AD_FREETYPE_DIR=freetype-2.8
+AD_FREETYPE=freetype
+AD_FREETYPE_FULL="$AD_DIR/$AD_FREETYPE/$AD_FREETYPE_DIR"
+
+AD_BZIP_DIR=bzip2-1.0.6
+AD_BZIP=bzip2
+AD_BZIP_FULL="$AD_DIR/$AD_BZIP/$AD_BZIP_DIR"
+
+AD_LIBBPG_DIR=libbpg-0.9.7
+AD_LIBBPG=libbpg
+AD_LIBBPG_FULL="$AD_DIR/$AD_LIBBPG/$AD_LIBBPG_DIR"
+
+#AD_JBIGKIT=$AD_DIR/
+
+AD_SDL2_DIR=SDL2-2.0.6
+AD_SDL2=SDL
+AD_SDL2_FULL="$AD_DIR/$AD_SDL2/$AD_SDL2_DIR"
+
+AD_SDL2_IMAGE_DIR=SDL2_image-2.0.1
+AD_SDL2_IMAGE=SDL
+AD_SDL2_IMAGE_FULL="$AD_DIR/$AD_SDL2_IMAGE/$AD_SDL2_IMAGE_DIR"
+
+AD_SDL2_TTF_DIR=SDL2_ttf-2.0.14
+AD_SDL2_TTF=SDL
+AD_SDL2_TTF_FULL="$AD_DIR/$AD_SDL2_TTF/$AD_SDL2_TTF_DIR"
+
+AD_SDL2_NET_DIR=SDL2_net-2.0.1
+AD_SDL2_NET=SDL
+AD_SDL2_NET_FULL="$AD_DIR/$AD_SDL2_NET/$AD_SDL2_NET_DIR"
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
@@ -266,10 +318,13 @@ then
    AD_CFLAGS="$AD_CFLAGS -mfpmath=sse -msse -msse2 -msse3 -mssse3"
 fi
 
-if [ "$AD_COMPILER" = "msvc*" ]
+if [ "$AD_COMPILER" = "msvc14" ] || [ "$AD_COMPILER" = "msvc15" ]
 then
   AD_CFLAGS="/O2"
   AD_CFLAGS_DEBUG="/Od"
+  
+  export PATH="$PATH:$BASEDIR"
+    echo "PATH: $PATH"
 fi
 
 
@@ -288,34 +343,6 @@ echo "AR: $AD_AR"
 # $1 library name
 # $2 folder version name
 # $3 exec directory
-StartBuild2()
-{
-
-    #Remove previous temp  dir and create new one to hold builds for other systems
-    rm -rf temp
-    mkdir temp
-    cd temp
-    #remove previous build
-    #echo "Removing $1/build/$3"
-    echo "Removing $AD_DIR/$1/$2/build/$3"
-    #rm -rf "$1/build/$3"
-    rm -rf "$AD_DIR/$1/$2/build/$3"
-    #copy builds with other settings
-    #echo "Copying $1/build TO $TEMPDIR/build"
-    echo "Copying $AD_DIR/$1/$2/build TO $TEMPDIR/build"
-    #cp -a "$1/build" "$TEMPDIR/build"
-    cp -a "$AD_DIR/$1/$2/build" "$TEMPDIR/build"
-    #echo "Removing $1"
-    echo "Removing $AD_DIR/$1/$2"
-    #rm -rf "$1"
-    rm -rf "$AD_DIR/$1/$2"
-    #echo "Copying $BASEDIR/thirdparty/$2 TO $1"
-    echo "Copying $BASEDIR/thirdparty/$1/$2 TO $AD_DIR/$1/"
-    #test -d "$1" || mkdir -p "$1" && cp -a "$BASEDIR/thirdparty/$2" "$1"
-    test -d "$AD_DIR/$1" || mkdir -p "$AD_DIR/$1" && cp -a "$BASEDIR/thirdparty/$1/$2" "$AD_DIR/$1"
-    
-}
-
 StartBuild()
 {
   #Remove previous temp  dir and create new one to hold builds for other systems
@@ -378,10 +405,43 @@ BuildZlib()
     echo "Building zlib"
     
     
-    if [ "$AD_COMPILER" = "msvc*" ]
+    if [ "$AD_COMPILER" == "msvc14" ] || [ "$AD_COMPILER" == "msvc15" ]
     then
-      msbuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln
+      echo COMPILE MSVC
+      TPLATFORM=x64
+      TCONFIG=Release
+      
+      if [ $3 = "x86" ]; then
+        TPLATFORM=Win32
+      fi
+      
+      if [ $4 = "debug" ]; then
+        TCONFIG="Debug"
+      fi
+      
+      StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
+      
+      #copy vsproject
+      cp $BASEDIR/thirdparty/$AD_ZLIB/zlibstat.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibstat.vcxproj
+      cp $BASEDIR/thirdparty/$AD_ZLIB/zlibvc.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibvc.vcxproj
+      
+      translate.sh MSBuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln /p:Configuration="$TCONFIG" /p:Platform="$TPLATFORM"
+      
+      TSTATFOLDER=ZlibStatRelease
+      TDLLFOLDER=ZlibDllRelease
+      if [ $4 == "debug" ] || [ $4 == "debug-static" ] || [ $4 == "debug-shared" ]; then
+        TSTATFOLDER=ZlibStatDebug
+        TDLLFOLDER=ZlibDllDebug
+      fi
+      
+      #copy build
+      test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/$TSTATFOLDER "$AD_ZLIB_FULL/build/$1"
+      test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/ $TDLLFOLDER "$AD_ZLIB_FULL/build/$1"
+      
+      EndBuild $AD_ZLIB $AD_ZLIB_DIR $1
+      
     else
+      echo COMPILE GCC
       STATIC=""
       if [ $2 = "static" ]; then
         STATIC="--static"
@@ -601,36 +661,141 @@ BuildLibjpeg()
   fi
 }
 
+
+BuildLibjpegturbo()
+{
+
+}
+
+#LZMA
+#public domain
+#https://tukaani.org/xz/
+BuildXz()
+{
+  
+  echo "Building xz"
+
+  #/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/./configure CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3" --disable-shared --prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build" --exec-prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build/ubuntu16.04/gcc/x64/release"
+
+  #rm -rf temp
+  #mkdir temp
+  #cd temp
+  #$AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC"
+  #make clean
+  #make
+  #make install
+  #cd $BASEDIR
+
+  StartBuild $AD_XZ $AD_XZ_DIR
+  $AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC" CC="$AD_CC" CXX="$AD_CXX"
+  CheckStatus "xz"
+  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+  CheckStatus "xz"
+  $AD_MAKE install
+  EndBuild $AD_XZ
+
+  #CC="$AD_CC" CXX="$AD_CXX"
+
+}
+
+BuildLibtiff()
+{
+
+}
+
+BuildLibwebp()
+{
+
+}
+
+BuildGiflib()
+{
+
+}
+
+BuildFreetype()
+{
+
+}
+
+BuildBzip()
+{
+
+}
+
+#combiniation of lgpl and gpl
+    #depends on libpng, zlib, sdl
+BuildLibbpg()
+{
+  
+  echo "Building libbpg"
+  StartBuild $AD_LIBBPG $AD_LIBBPG_DIR
+  cd $AD_LIBBPG
+  echo "$AD_LIBPNG/build/$AD_EXEC/lib"
+  C_INCLUDE_PATH="$C_INCLUDE_PATH:$AD_LIBPNG/build/include:$AD_LIBJPG/build/include" LIBRARY_PATH="$LIBRARY_PATH:$AD_LIBPNG/build/$AD_EXEC/lib:$AD_ZLIB/build/$AD_EXEC/lib:$AD_LIBJPG/build/$AD_EXEC/lib" $AD_MAKE CONFIG_APPLE=y prefix="build/$AD_EXEC" LIBS=-lz -j"$AD_THREADS"
+  CheckStatus "libbpg"
+  $AD_MAKE install
+  cd $BASEDIR/temp
+  EndBuild $AD_LIBBPG
+}
+
+
+
+#permissive
+#
+BuildSDL2()
+{
+  if [ $5 = "free" ]; then
+    echo "Building SDL2"
+    
+    if [ "$AD_COMPILER" == "msvc" ]
+    then
+    
+      StartBuild $AD_SDL2 $AD_SDL2_DIR $1
+      
+      EndBuild $AD_SDL2
+    else
+    
+      StartBuild $AD_SDL2 $AD_SDL2_DIR $1
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "SDL2"
+      #ALSA or esd may be needed on linux for sound
+      #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
+      #--with-alsa-inc-prefix=PFX  Prefix where include libraries are (optional)
+      #--with-esd-prefix=PFX   Prefix where ESD is installed (optional)
+      #--with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
+
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "SDL2"
+      $AD_MAKE install
+      EndBuild $AD_SDL2 $AD_SDL2_DIR $1
+    
+    fi
+  fi
+}
+
+BuildSdl2Image()
+{
+
+}
+
+BuildSdl2Ttf()
+{
+
+}
+
+BuildSdl2Net()
+{
+
+}
+
+
 if false
 then
 
 
 
-#LZMA
-#public domain
-#https://tukaani.org/xz/
-echo "Building xz"
-
-#/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/./configure CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3" --disable-shared --prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build" --exec-prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build/ubuntu16.04/gcc/x64/release"
-
-#rm -rf temp
-#mkdir temp
-#cd temp
-#$AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC"
-#make clean
-#make
-#make install
-#cd $BASEDIR
-
-StartBuild $AD_XZ $AD_XZ_DIR
-$AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC" CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "xz"
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "xz"
-$AD_MAKE install
-EndBuild $AD_XZ
-
-#CC="$AD_CC" CXX="$AD_CXX"
 
 
 
@@ -638,8 +803,8 @@ EndBuild $AD_XZ
 #http://www.simplesystems.org/libtiff/
 #requires xz, zlib, libjpg
 echo "Building libtiff"
-StartBuild $AD_LIBTIF $AD_LIBTIF_DIR
-$AD_LIBTIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIF/build --exec-prefix=$AD_LIBTIF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR
+$AD_LIBTIFF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIFF/build --exec-prefix=$AD_LIBTIFF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
 CheckStatus "libtiff"
 
 #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
@@ -653,20 +818,20 @@ CheckStatus "libtiff"
 $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
 CheckStatus "libtiff"
 $AD_MAKE install
-EndBuild $AD_LIBTIF
+EndBuild $AD_LIBTIFF
 
 
 
 #permissive
 #http://giflib.sourceforge.net/
 echo "Building giflib"
-StartBuild $AD_LIBGIF $AD_LIBGIF_DIR
-$AD_LIBGIF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_LIBGIF/build --exec-prefix=$AD_LIBGIF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+StartBuild $AD_GIFLIB $AD_GIFLIB_DIR
+$AD_GIFLIB/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_GIFLIB/build --exec-prefix=$AD_GIFLIB/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
 CheckStatus "giflib"
 $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
 CheckStatus "giflib"
 $AD_MAKE install
-EndBuild $AD_LIBGIF
+EndBuild $AD_GIFLIB
 
 
 
@@ -685,22 +850,7 @@ EndBuild $AD_BZIP
 
 
 
-#permissive
-#
-echo "Building SDL2"
-StartBuild $AD_SDL2 $AD_SDL2_DIR
-$AD_SDL2/./configure CFLAGS="$AD_CFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2/build --exec-prefix=$AD_SDL2/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-CheckStatus "SDL2"
-#ALSA or esd may be needed on linux for sound
-#--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
-#--with-alsa-inc-prefix=PFX  Prefix where include libraries are (optional)
-#--with-esd-prefix=PFX   Prefix where ESD is installed (optional)
-#--with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
 
-$AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-CheckStatus "SDL2"
-$AD_MAKE install
-EndBuild $AD_SDL2
 
 
 
@@ -733,7 +883,7 @@ EndBuild $AD_FREETYPE
 #$AD_LIBWEBP/./autogen.sh
 echo "Building libwebp"
 StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR
-$AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIF/build/include --with-tifflibdir=$AD_LIBTIF/build/$AD_EXEC/lib --with-gifincludedir=$AD_LIBGIF/build/include  --with-giflibdir=$AD_LIBGIF/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
+$AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIFF/build/include --with-tifflibdir=$AD_LIBTIFF/build/$AD_EXEC/lib --with-gifincludedir=$AD_GIFLIB/build/include  --with-giflibdir=$AD_GIFLIB/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
 CheckStatus "libwebp"
 $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
 CheckStatus "libwebp"
@@ -752,7 +902,7 @@ StartBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR
 
 if [ $AD_OS = "macos" ]
 then
-    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIF/build/$AD_EXEC/lib -L$AD_LIBGIF/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX"
+    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX"
     CheckStatus "SDL2_image"
     $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "SDL2_image"
@@ -760,7 +910,7 @@ then
 
 else
 
-    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIF/build/$AD_EXEC/lib -L$AD_LIBGIF/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib -L$AD_XZ/build/$AD_EXEC/lib" CPPFLAGS="-I$AD_LIBWEBP/build/include -I$AD_LIBTIF/build/include -I$AD_LIBGIF/build/include -I$AD_LIBJPG/build/include -I$AD_SDL2/build/include -I$AD_LIBPNG/build/include" LIBS="-lSDL2 -llzma -lm" CC="$AD_CC" CXX="$AD_CXX"
+    $AD_SDL2_IMAGE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE/build --exec-prefix=$AD_SDL2_IMAGE/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2/build/include/SDL2 SDL_LIBS=-L$AD_SDL2/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=-L$AD_LIBPNG/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib -L$AD_XZ/build/$AD_EXEC/lib" CPPFLAGS="-I$AD_LIBWEBP/build/include -I$AD_LIBTIFF/build/include -I$AD_GIFLIB/build/include -I$AD_LIBJPG/build/include -I$AD_SDL2/build/include -I$AD_LIBPNG/build/include" LIBS="-lSDL2 -llzma -lm" CC="$AD_CC" CXX="$AD_CXX"
     CheckStatus "SDL2_image"
     
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
@@ -807,17 +957,7 @@ EndBuild $AD_SDL2_NET
 
 
 
-#combiniation of lgpl and gpl
-#depends on libpng, zlib, sdl
-echo "Building libbpg"
-StartBuild $AD_LIBBPG $AD_LIBBPG_DIR
-cd $AD_LIBBPG
-echo "$AD_LIBPNG/build/$AD_EXEC/lib"
-C_INCLUDE_PATH="$C_INCLUDE_PATH:$AD_LIBPNG/build/include:$AD_LIBJPG/build/include" LIBRARY_PATH="$LIBRARY_PATH:$AD_LIBPNG/build/$AD_EXEC/lib:$AD_ZLIB/build/$AD_EXEC/lib:$AD_LIBJPG/build/$AD_EXEC/lib" $AD_MAKE CONFIG_APPLE=y prefix="build/$AD_EXEC" LIBS=-lz -j"$AD_THREADS"
-CheckStatus "libbpg"
-$AD_MAKE install
-cd $BASEDIR/temp
-EndBuild $AD_LIBBPG
+
 
 fi
 
@@ -849,6 +989,66 @@ BuildAll()
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBJPEG" = true ]
   then
     BuildLibjpeg $EXEC_DIR $1 $2 $3 $4
+  fi
+  
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBJPEGTURBO" = true ]
+  then
+    BuildLibjpegturbo $EXEC_DIR $1 $2 $3 $4
+  fi
+  
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_XZ" = true ]
+  then
+    BuildXz  $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBTIFF" = true ]
+  then
+    BuildLibtiff $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBWEBP" = true ]
+  then
+    BuildLibwebp $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_GIFLIB" = true ]
+  then
+    BuildGiflib $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_FREETYPE" = true ]
+  then
+    BuildFreetype $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBBZIP" = true ]
+  then
+    BuildBzip $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBBPG" = true ]
+  then
+    BuildLibbpg $EXEC_DIR $1 $2 $3 $4
+  fi
+   
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_SDL2" = true ]
+  then
+    BuildSdl2 $EXEC_DIR $1 $2 $3 $4
+  fi
+   
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_SDL2IMAGE" = true ]
+  then
+    BuildSdl2Image $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_SDL2_TTF" = true ]
+  then
+    BuildSdl2Ttf $EXEC_DIR $1 $2 $3 $4
+  fi
+
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_SDL2_NET" = true ]
+  then
+    BuildSdl2Net $EXEC_DIR $1 $2 $3 $4
   fi
 }
 
