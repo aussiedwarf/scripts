@@ -84,7 +84,7 @@ git clone https://chromium.googlesource.com/webm/libwebp thirdparty/webp/master
 mkdir thirdparty/SDL
 
 if [ ! -f thirdparty/SDL/SDL2-2.0.7.tar.gz ]; then
-  wget -O thirdparty/SDL/SDL2-2.0.7.tar.gz https://www.libsdl.org/release/SDL2-2.0.6.tar.gz
+  wget -O thirdparty/SDL/SDL2-2.0.7.tar.gz https://www.libsdl.org/release/SDL2-2.0.7.tar.gz
   tar -xf thirdparty/SDL/SDL2-2.0.7.tar.gz -C thirdparty/SDL/
 fi
 
