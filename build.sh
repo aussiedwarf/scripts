@@ -463,7 +463,7 @@ BuildZlib()
         
         
         echo Make
-        $AD_MAKE "-f$AD_ZLIB_FULL/win32/Makefile.gcc" CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" 
+        $AD_MAKE "-f$AD_ZLIB_FULL/win32/Makefile.gcc" CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" -j"$AD_THREADS"
         CheckStatus "Zlib"
         $AD_MAKE "-fwin32/Makefile.gcc" install DESTDIR="$AD_ZLIB_FULL/build/$1" "$STATIC"
         
@@ -805,7 +805,7 @@ BuildLibbpg()
 
 #permissive
 #
-BuildSDL2()
+BuildSdl2()
 {
   if [ $5 = "free" ]; then
     echo "Building SDL2"
@@ -825,7 +825,14 @@ BuildSDL2()
         TCFLAGS=$AD_CFLAGS_DEBUG
       fi
       
-      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
+      THOST=""
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        TFLAGS=--host=x86_64-w64-mingw32
+        #i686-w64-mingw32
+      fi
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC"  
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -833,7 +840,7 @@ BuildSDL2()
       #--with-esd-prefix=PFX   Prefix where ESD is installed (optional)
       #--with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
 
-      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" -j"$AD_THREADS"
       CheckStatus "SDL2"
       $AD_MAKE install
       EndBuild $AD_SDL2 $AD_SDL2_DIR $1
@@ -914,10 +921,6 @@ BuildSdl2Net()
 }
 
 
-if false
-then
-
-
 
 #https://www.freedesktop.org/wiki/Software/HarfBuzz/
 #complex package requires ICU flus freetype circular dependency
@@ -928,7 +931,6 @@ then
 #HARFBUZZ_LIBS linker flags for HARFBUZZ, overriding pkg-config
 
 
-fi
 
 #libcurl
 #openssl
