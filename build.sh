@@ -362,6 +362,8 @@ StartBuild()
     echo "Copying $BASEDIR/thirdparty/$1/$2 TO $AD_DIR/$1/"
     test -d "$AD_DIR/$1" || mkdir -p "$AD_DIR/$1" && cp -a "$BASEDIR/thirdparty/$1/$2" "$AD_DIR/$1"
     
+    mkdir -p "$AD_DIR/$1/$2/build/$3"
+    
     cd "$AD_DIR/$1/$2"
 }
 
@@ -664,7 +666,10 @@ BuildLibjpeg()
 
 BuildLibjpegturbo()
 {
-  echo building turbo libjpeg
+  if [ $5 = "free" ]; then
+  
+    echo building turbo libjpeg
+  fi
 }
 
 #LZMA
@@ -786,7 +791,7 @@ BuildBzip()
 }
 
 #combiniation of lgpl and gpl
-    #depends on libpng, zlib, sdl
+#depends on libpng, zlib, sdl
 BuildLibbpg()
 {
   
@@ -832,7 +837,15 @@ BuildSdl2()
         #i686-w64-mingw32
       fi
       
-      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 --disable-shared --enable-static --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$AD_EXEC $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC"  
+      TSTATIC="--disable-static"
+      TSHARED="--disable-shared"
+      if [ "$2" = "static" ]; then
+        TSTATIC="--enable-static"
+      else
+        TSHARED="--enable-shared"
+      fi
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" 
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -840,10 +853,21 @@ BuildSdl2()
       #--with-esd-prefix=PFX   Prefix where ESD is installed (optional)
       #--with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
 
-      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" -j"$AD_THREADS"
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
       CheckStatus "SDL2"
-      $AD_MAKE install
-      EndBuild $AD_SDL2 $AD_SDL2_DIR $1
+      
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        #rename windows files to unix in .dep foler
+        if cd build ; then
+          sed -i -- 's/C:/\/mnt\/c/g' *
+          cd ../
+        fi
+      fi
+      
+      $AD_MAKE install V=1
+      #DESTDIR="$AD_SDL2_FULL/build/$1"
+      #EndBuild $AD_SDL2 $AD_SDL2_DIR $1
     
     fi
   fi
