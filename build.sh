@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
-#./build.sh -c mingw -b sdl2 2>&1 | tee output.log
+#./build.sh -c mingw -b libjpegturbo 2>&1 | tee output.log
 #./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
@@ -36,6 +36,7 @@ AD_STRIP=strip
 AD_DLLTOOL=dlltool
 AD_RANLIB=ranlib
 AD_DIR=../thirdparty
+AD_NASM=nasm
 
 AD_THREADS=1
 #AD_HARFBUZZ=$AD_DIR/harfbuzz/harfbuzz-1.4.6
@@ -289,6 +290,7 @@ then
     AD_RC="translate.sh windres.exe"
     AD_DLLTOOL="translate.sh dlltool.exe"
     AD_RANLIB="translate.sh ranlib.exe"
+    AD_NASM="translate.sh nasm.exe"
     AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -Og"
     
     export PATH="$PATH:$BASEDIR"
@@ -669,6 +671,79 @@ BuildLibjpegturbo()
   if [ $5 = "free" ]; then
   
     echo building turbo libjpeg
+    
+    if [ "$AD_COMPILER" == "msvc" ]
+    then
+    
+      StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      
+      EndBuild $AD_LIBJPGTURBO
+    else
+    
+      StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      
+      TCFLAGS=$AD_CFLAGS
+      if [ "$4" = "debug" ]; then
+        TCFLAGS=$AD_CFLAGS_DEBUG
+      fi
+      
+      TFLAGS=""
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        echo Arch "$3"
+        if [ "$3" = "x64" ]
+        then
+          TFLAGS=--host=x86_64-w64-mingw32
+        else
+          TFLAGS=--host=i686-w64-mingw32
+        fi
+      fi
+      
+      TSTATIC="--disable-static"
+      TSHARED="--disable-shared"
+      if [ $2 = "static" ]; then
+        TSTATIC="--enable-static"
+      else
+        TSHARED="--enable-shared"
+      fi
+      
+      StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      
+      
+      autoreconf -f -i
+      
+      
+      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$CFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
+      
+      echo pwd
+      
+      CheckStatus "turbo libjpeg"
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      
+      CheckStatus "turbo libjpeg"
+      
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        #rename windows files to unix in .dep foler
+        if cd .deps ; then
+          sed -i -- 's/C:/\/mnt\/c/g' *
+          cd ../
+        fi
+        if cd simd/.deps ; then
+          sed -i -- 's/C:/\/mnt\/c/g' *
+          cd ../../
+        fi
+        if cd md5/.deps ; then
+          sed -i -- 's/C:/\/mnt\/c/g' *
+          cd ../../
+        fi
+      fi
+      
+      $AD_MAKE install V=1
+      EndBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      
+    fi
+    
   fi
 }
 
@@ -830,11 +905,15 @@ BuildSdl2()
         TCFLAGS=$AD_CFLAGS_DEBUG
       fi
       
-      THOST=""
+      TFLAGS=""
       if [ "$AD_COMPILER" = "mingw" ]
       then
-        TFLAGS=--host=x86_64-w64-mingw32
-        #i686-w64-mingw32
+        if [ $3 = x64]
+        then
+          TFLAGS=--host=x86_64-w64-mingw32
+        else
+          TFLAGS=--host=i686-w64-mingw32
+        fi
       fi
       
       TSTATIC="--disable-static"
@@ -867,7 +946,7 @@ BuildSdl2()
       
       $AD_MAKE install V=1
       #DESTDIR="$AD_SDL2_FULL/build/$1"
-      #EndBuild $AD_SDL2 $AD_SDL2_DIR $1
+      EndBuild $AD_SDL2 $AD_SDL2_DIR $1
     
     fi
   fi
