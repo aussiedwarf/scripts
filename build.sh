@@ -546,7 +546,7 @@ BuildLibpng()
       #need to copy folder as ./configure does not copy
       
       
-      $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
+      $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
       
       
       
@@ -617,6 +617,22 @@ BuildLibpng()
         # gcc.exe -shared -o libpng.dll libpng16.a -W1,--out-implib,libpng.dll.a
         #C:/Users/aussiedwarf/dev/thirdparty/libpng/libpng-1.6.32/build/windows/mingw/x64/release-static/lib/
         CheckStatus "libpng"
+      fi
+      
+      #copy include files since mingw cant seem to follow junctions
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        rm $AD_LIBPNG_FULL/build/$1/include/png.h
+        cp $AD_LIBPNG_FULL/build/$1/include/libpng16/png.h $AD_LIBPNG_FULL/build/$1/include
+        rm $AD_LIBPNG_FULL/build/$1/include/pngconf.h
+        cp $AD_LIBPNG_FULL/build/$1/include/libpng16/pngconf.h $AD_LIBPNG_FULL/build/$1/include
+        rm $AD_LIBPNG_FULL/build/$1/include/pnglibconf.h
+        cp $AD_LIBPNG_FULL/build/$1/include/libpng16/pnglibconf.h $AD_LIBPNG_FULL/build/$1/include
+        
+        rm $AD_LIBPNG_FULL/build/$1/lib/libpng.a
+        rm $AD_LIBPNG_FULL/build/$1/lib/libpng.la
+        cp $AD_LIBPNG_FULL/build/$1/lib/libpng16.a $AD_LIBPNG_FULL/build/$1/lib/libpng.a
+        cp $AD_LIBPNG_FULL/build/$1/lib/libpng16.la $AD_LIBPNG_FULL/build/$1/lib/libpng.la
       fi
       
       EndBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
@@ -951,7 +967,7 @@ BuildSdl2()
       
       $AD_MAKE install V=1
       #DESTDIR="$AD_SDL2_FULL/build/$1"
-      #EndBuild $AD_SDL2 $AD_SDL2_DIR $1
+      EndBuild $AD_SDL2 $AD_SDL2_DIR $1
     
     fi
   fi
@@ -1014,8 +1030,10 @@ BuildSdl2Image()
         touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
         
         #LIBS="-lSDL2 -llzma -lm"
+        #Removed as as causes mingw compile to hang when first using libtool as it runs as.exe which does nothing with no input
         # AS="$AD_AS"
-        $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED $TFLAGS --with-sdl-prefix=$AD_SDL2_FULL/build --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 --prefix=$AD_SDL2_IMAGE_FULL/build --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPGTURBO_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_XZ_FULL/build/$1/lib" CPPFLAGS="-I$AD_LIBWEBP_FULL/build/include -I$AD_LIBTIFF_FULL/build/include -I$AD_GIFLIB_FULL/build/include -I$AD_LIBJPGTURBO_FULL/build/include -I$AD_SDL2_FULL/build/include -I$AD_LIBPNG_FULL/build/include" LIBS="-lSDL2" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+        #todo libpng does not seem to place /build/include
+        $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED $TFLAGS --with-sdl-prefix=$AD_SDL2_FULL/build --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 --prefix=$AD_SDL2_IMAGE_FULL/build --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPGTURBO_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_XZ_FULL/build/$1/lib" CPPFLAGS="-I$AD_LIBWEBP_FULL/build/include -I$AD_LIBTIFF_FULL/build/include -I$AD_GIFLIB_FULL/build/include -I$AD_LIBJPGTURBO_FULL/build/include -I$AD_SDL2_FULL/build/include -I$AD_LIBPNG_FULL/build/$1/include" LIBS="-lSDL2" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
         CheckStatus "SDL2_image"
         
         $AD_MAKE LIBS="$TLIBS" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES" -j"$AD_THREADS" V=1
