@@ -113,7 +113,7 @@ case "$OSTYPE" in
 esac
 
 #check for WSL
-if [ AD_OS="linux" ] ; then
+if [ $AD_OS="linux" ] ; then
   if grep -q Microsoft /proc/version; then
     AD_OS="windows"
   fi
@@ -518,9 +518,9 @@ BuildLibpng()
         FLAGS="$FLAGS --host=mingw32"
       fi
       
-      CFLAGS=$AD_CFLAGS
+      TCFLAGS=$AD_CFLAGS
       if [ "$4" = "debug" ]; then
-        CFLAGS=$AD_CFLAGS_DEBUG
+        TCFLAGS=$AD_CFLAGS_DEBUG
       fi
     
       #STATIC="--disable-static"
@@ -546,7 +546,7 @@ BuildLibpng()
       #need to copy folder as ./configure does not copy
       
       
-      $AD_LIBPNG_FULL/./configure CFLAGS="$CFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
+      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
       
       
       
@@ -732,7 +732,7 @@ BuildLibjpegturbo()
       autoreconf -f -i
       
       
-      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$CFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
+      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$TCFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
       
       echo pwd
       
@@ -772,28 +772,83 @@ BuildLibjpegturbo()
 BuildXz()
 {
   
-  echo "Building xz"
+  if [ $5 = "free" ]; then
+    echo "Building xz"
 
-  #/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/./configure CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3" --disable-shared --prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build" --exec-prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build/ubuntu16.04/gcc/x64/release"
+    #/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/./configure CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops -mfpmath=sse -msse -msse2 -msse3 -mssse3" --disable-shared --prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build" --exec-prefix="/home/hypergiant/dev/thirdparty/xz/xz-5.2.3/build/ubuntu16.04/gcc/x64/release"
 
-  #rm -rf temp
-  #mkdir temp
-  #cd temp
-  #$AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC"
-  #make clean
-  #make
-  #make install
-  #cd $BASEDIR
+    #rm -rf temp
+    #mkdir temp
+    #cd temp
+    #$AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC"
+    #make clean
+    #make
+    #make install
+    #cd $BASEDIR
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
+      #todo fix threads=posix or yes crashing build complaining about undefined sigfillset
+      TOPTIONS="--enable-threads=vista --disable-scripts --disable-nls"
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
 
-  StartBuild $AD_XZ $AD_XZ_DIR
-  $AD_XZ/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix="$AD_XZ/build" --exec-prefix="$AD_XZ/build/$AD_EXEC" CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "xz"
-  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "xz"
-  $AD_MAKE install
-  EndBuild $AD_XZ
+    StartBuild $AD_XZ $AD_XZ_DIR $1
+    
+    touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
+    #need to set posix to avoid undefinde sigset when trying with posix threads in mingw
+    #-D_POSIX
+    $AD_XZ_FULL/./configure CFLAGS="$TCFLAGS -std=c11" "$TSHARED" "$TSTATIC" $TOPTIONS --prefix="$AD_XZ_FULL/build" --exec-prefix="$AD_XZ_FULL/build/$1" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    CheckStatus "xz"
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "xz"
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #rename windows files to unix in .dep foler
+      if cd src/liblzma/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/xzdec/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/xz/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/lzmainfo/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+    fi
+    
+    $AD_MAKE install
+    EndBuild $AD_XZ $AD_XZ_DIR $1
 
-  #CC="$AD_CC" CXX="$AD_CXX"
+    #CC="$AD_CC" CXX="$AD_CXX"
+  fi
 
 }
 
@@ -1051,7 +1106,9 @@ BuildSdl2Image()
 
       fi
       make install V=1
-      #EndBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR $1
+      EndBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR $1
+      
+      
     fi
   fi 
 }
