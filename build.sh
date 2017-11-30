@@ -857,23 +857,81 @@ BuildXz()
 #requires xz, zlib, libjpg
 BuildLibtiff()
 {
-  echo "Building libtiff"
-  StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR
-  $AD_LIBTIFF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --with-zlib-include-dir=$AD_ZLIB/build/include --with-zlib-lib-dir=$AD_ZLIB/build/$AD_EXEC/lib --with-jpeg-include-dir=$AD_LIBJPG/build/include --with-jpeg-lib-dir=$AD_LIBJPG/build/$AD_EXEC/lib --with-lzma-include-dir=$AD_XZ/build/include --with-lzma-lib-dir=$AD_XZ/build/$AD_EXEC/lib  --prefix=$AD_LIBTIFF/build --exec-prefix=$AD_LIBTIFF/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "libtiff"
+  if [ $5 = "free" ]; then
+  
+    echo "Building libtiff"
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
 
-  #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
-  #--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
-  #unsure of source for libjpeg12
-  #looks to be ijg compiled again for 12bit but may need modifiedtiff and jpeg code to not clash
-  #don't need 12bit support
-  #--with-jpeg12-include-dir=DIR location of libjpeg 12bit headers
-  #--with-jpeg12-lib=LIBRARY path to libjpeg 12bit library
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
+    StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
+    $AD_LIBTIFF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --with-zlib-include-dir=$AD_ZLIB_FULL/build/include --with-zlib-lib-dir=$AD_ZLIB_FULL/build/$1/lib --with-jpeg-include-dir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeg-lib-dir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-lzma-include-dir=$AD_XZ_FULL/build/$1/include --with-lzma-lib-dir=$AD_XZ_FULL/build/$1/lib  --prefix=$AD_LIBTIFF_FULL/build/$1 --exec-prefix=$AD_LIBTIFF_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    CheckStatus "libtiff"
 
-  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "libtiff"
-  $AD_MAKE install
-  EndBuild $AD_LIBTIFF
+    #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
+    #--with-jbig-lib-dir=DIR location of JBIG-KIT library binary
+    #unsure of source for libjpeg12
+    #looks to be ijg compiled again for 12bit but may need modifiedtiff and jpeg code to not clash
+    #don't need 12bit support
+    #--with-jpeg12-include-dir=DIR location of libjpeg 12bit headers
+    #--with-jpeg12-lib=LIBRARY path to libjpeg 12bit library
+
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "libtiff"
+    
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #rename windows files to unix in .dep foler
+      if cd libtiff/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+      if cd tools/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+      if cd  contrib/addtiffo/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd  contrib/dbs/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd  contrib/iptcutil/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+    fi
+    
+    $AD_MAKE install
+    #EndBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
+    
+  fi
 }
 
 #permissive
