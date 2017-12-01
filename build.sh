@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
-#./build.sh -c mingw -b libjpegturbo 2>&1 | tee output.log
+#./build.sh -c mingw -b giflib 2>&1 | tee output.log
 #./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
@@ -929,8 +929,76 @@ BuildLibtiff()
     fi
     
     $AD_MAKE install
-    #EndBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
+    EndBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
     
+  fi
+}
+
+#permissive
+#http://giflib.sourceforge.net/
+BuildGiflib()
+{
+  if [ $5 = "free" ]; then
+  
+    echo "Building giflib"
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
+
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
+    StartBuild $AD_GIFLIB $AD_GIFLIB_DIR $1
+    
+    touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
+    #autoreconf -f -i
+    
+    
+    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    
+    CheckStatus "giflib"
+    
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "giflib"
+    
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #rename windows files to unix in .dep foler
+      if cd lib/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+      if cd util/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+    fi
+    
+    $AD_MAKE install
+    
+    EndBuild $AD_GIFLIB $AD_GIFLIB_DIR $1
+  
   fi
 }
 
@@ -939,29 +1007,26 @@ BuildLibtiff()
 BuildLibwebp()
 {
 
-  echo "Building libwebp"
-  StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR
-  $AD_LIBWEBP/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPG/build/include --with-jpeglibdir=$AD_LIBJPG/build/$AD_EXEC/lib --with-tiffincludedir=$AD_LIBTIFF/build/include --with-tifflibdir=$AD_LIBTIFF/build/$AD_EXEC/lib --with-gifincludedir=$AD_GIFLIB/build/include  --with-giflibdir=$AD_GIFLIB/build/$AD_EXEC/lib --with-pngincludedir=$AD_LIBPNG/build/include --with-pnglibdir=$AD_LIBPNG/build/$AD_EXEC/lib --prefix=$AD_LIBWEBP/build --exec-prefix=$AD_LIBWEBP/build/$AD_EXEC LDFLAGS="-L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_ZLIB/build/$AD_EXEC/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "libwebp"
-  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "libwebp"
-  $AD_MAKE install
-  EndBuild $AD_LIBWEBP
+  if [ $5 = "free" ]; then
+  
+    echo "Building libwebp"
+    
+    StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
+    
+    $AD_LIBWEBP_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeglibdir=$AD_LIBJPGTURBO/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "libwebp"
+    
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "libwebp"
+    
+    $AD_MAKE install
+    
+    EndBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
+  
+  fi
 }
 
-#permissive
-#http://giflib.sourceforge.net/
-BuildGiflib()
-{
-  echo "Building giflib"
-  StartBuild $AD_GIFLIB $AD_GIFLIB_DIR
-  $AD_GIFLIB/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_GIFLIB/build --exec-prefix=$AD_GIFLIB/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "giflib"
-  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "giflib"
-  $AD_MAKE install
-  EndBuild $AD_GIFLIB
-}
+
 
 #permissive with advertising
 #https://freetype.org/index.html
