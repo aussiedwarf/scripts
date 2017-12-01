@@ -1011,13 +1011,71 @@ BuildLibwebp()
   
     echo "Building libwebp"
     
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
+
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
     StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
     
-    $AD_LIBWEBP_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeglibdir=$AD_LIBJPGTURBO/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lz" CC="$AD_CC" CXX="$AD_CXX"
+    ./autogen.sh
+    
+    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libwebp"
     
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "libwebp"
+    
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #rename windows files to unix in .dep foler
+      if cd src/dec/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/enc/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/dsp/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd src/utils/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../../
+      fi
+      if cd imageio/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+      if cd examples/.deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../../
+      fi
+    fi
     
     $AD_MAKE install
     
