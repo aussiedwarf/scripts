@@ -1317,40 +1317,89 @@ BuildSdl2Image()
 
 BuildSdl2Ttf()
 {
-  echo "Building SDL2_ttf"
-  StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR
+  
+  if [ $5 = "free" ]; then
+    echo "Building SDL2_ttf"
+    StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR
 
-  if [ $AD_OS = "macos" ]
-  then
+    if [ $AD_OS = "macos" ]
+    then
 
-    $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
-    CheckStatus "SDL2_image"
-    $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-    CheckStatus "SDL2_image"
+      $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "SDL2_image"
+      $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "SDL2_image"
 
-  else
+    else
 
-    $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
-    CheckStatus "SDL2_image"
-    $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-    CheckStatus "SDL2_image"
+      $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+      CheckStatus "SDL2_image"
+      $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      CheckStatus "SDL2_image"
 
+    fi
+
+    $AD_MAKE install
+    EndBuild $AD_SDL2_TTF
   fi
-
-  $AD_MAKE install
-  EndBuild $AD_SDL2_TTF
 }
 
 BuildSdl2Net()
 {
-  echo "Building SDL2_net"
-  StartBuild $AD_SDL2_NET $AD_SDL2_NET_DIR
-  $AD_SDL2_NET/./configure CFLAGS="$AD_CFLAGS" CXXFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_NET/build --exec-prefix=$AD_SDL2_NET/build/$AD_EXEC --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "SDL2_net"
-  $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "SDL2_net"
-  $AD_MAKE install
-  EndBuild $AD_SDL2_NET
+  if [ $5 = "free" ]; then
+    echo "Building SDL2_net"
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TLIBS=-lSDL2
+    TFLAGS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS=--host=x86_64-w64-mingw32
+      else
+        TFLAGS=--host=i686-w64-mingw32
+      fi
+      
+      TLIBS="-lmingw32 $TLIBS -lSDL2main"
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ "$2" = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
+    StartBuild $AD_SDL2_NET $AD_SDL2_NET_DIR $1
+    
+    
+    touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
+        
+    $AD_SDL2_NET_FULL/./configure CFLAGS="$TCFLAGS" CXXFLAGS="$TCFLAGS" $TSTATIC $TSHARED $TFLAGS --prefix=$AD_SDL2_NET_FULL/build/$1 --exec-prefix=$AD_SDL2_NET_FULL/build/$1 --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+    
+    CheckStatus "SDL2_net"
+    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    CheckStatus "SDL2_net"
+    
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #rename windows files to unix in .dep foler
+      if cd .deps ; then
+        find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+        cd ../
+      fi
+    fi
+        
+    $AD_MAKE install
+    EndBuild $AD_SDL2_NET $AD_SDL2_NET_DIR $1
+  fi
 }
 
 
