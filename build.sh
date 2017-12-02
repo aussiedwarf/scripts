@@ -1105,41 +1105,107 @@ BuildLibwebp()
   fi
 }
 
-
-
-#permissive with advertising
-#https://freetype.org/index.html
-#requires zlib, libpng, bzip2, harfbuzz(currently disabled)
-BuildFreetype()
+#bzip make install fails for mingw as it assumes names without .exe
+#this copies install but adds .exe
+InstallBzip()
 {
-
-  echo "Building Freetype"
-  StartBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
-  $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build/$1 --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
-  CheckStatus "Freetype"
-  #Adding cc and cxx here causes freetype to not compile
-  $AD_MAKE -j"$AD_THREADS"
-  CheckStatus "Freetype"
-  $AD_MAKE install
-  EndBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
+  if ( test ! -d $1/bin ) ; then mkdir -p $1/bin ; fi
+	if ( test ! -d $1/lib ) ; then mkdir -p $1/lib ; fi
+	if ( test ! -d $1/man ) ; then mkdir -p $1/man ; fi
+	if ( test ! -d $1/man/man1 ) ; then mkdir -p $1/man/man1 ; fi
+	if ( test ! -d $1/include ) ; then mkdir -p $1/include ; fi
+	cp -f bzip2.exe $1/bin/bzip2.exe
+	cp -f bzip2.exe $1/bin/bunzip2.exe
+	cp -f bzip2.exe $1/bin/bzcat.exe
+	cp -f bzip2recover.exe $1/bin/bzip2recover.exe
+	chmod a+x $1/bin/bzip2.exe
+	chmod a+x $1/bin/bunzip2.exe
+	chmod a+x $1/bin/bzcat.exe
+	chmod a+x $1/bin/bzip2recover.exe
+	cp -f bzip2.1 $1/man/man1
+	chmod a+r $1/man/man1/bzip2.1
+	cp -f bzlib.h $1/include
+	chmod a+r $1/include/bzlib.h
+	cp -f libbz2.a $1/lib
+	chmod a+r $1/lib/libbz2.a
+	cp -f bzgrep.exe $1/bin/bzgrep.exe
+	ln -s -f $1/bin/bzgrep.exe $1/bin/bzegrep.exe
+	ln -s -f $1/bin/bzgrep.exe $1/bin/bzfgrep.exe
+	chmod a+x $1/bin/bzgrep.exe
+	cp -f bzmore.exe $1/bin/bzmore.exe
+	ln -s -f $1/bin/bzmore.exe $1/bin/bzless.exe
+	chmod a+x $1/bin/bzmore.exe
+	cp -f bzdiff.exe $1/bin/bzdiff.exe
+	ln -s -f $1/bin/bzdiff.exe $1/bin/bzcmp.exe
+	chmod a+x $1/bin/bzdiff.exe
+	cp -f bzgrep.1 bzmore.1 bzdiff.1 $1/man/man1
+	chmod a+r $1/man/man1/bzgrep.1
+	chmod a+r $1/man/man1/bzmore.1
+	chmod a+r $1/man/man1/bzdiff.1
+  echo ".so man1/bzgrep.1" > $1/man/man1/bzegrep.1
+	echo ".so man1/bzgrep.1" > $1/man/man1/bzfgrep.1
+	echo ".so man1/bzmore.1" > $1/man/man1/bzless.1
+	echo ".so man1/bzdiff.1" > $1/man/man1/bzcmp.1
 }
 
 #permissive
 #http://www.bzip.org/
 BuildBzip()
 {
+  if [ $5 = "free" ]; then
+    echo "Building bzip2"
 
-  echo "Building bzip2"
+    StartBuild $AD_BZIP $AD_BZIP_DIR $1
 
-  StartBuild $AD_BZIP $AD_BZIP_DIR
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
 
-  cd $AD_BZIP
-  $AD_MAKE clean
-  $AD_MAKE CFLAGS="$AD_CFLAGS" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-  CheckStatus "bzip2"
-  $AD_MAKE install -f $AD_BZIP/Makefile  PREFIX=$AD_BZIP/build/$AD_EXEC
-  EndBuild $AD_BZIP
+    #test fails for mingw in maikefile since if tries to find ./bzip2 rather than bzip2.exe
+    #hence we skip the test for mingw
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      #libbz2.a bzip2 bzip2recover
+      $AD_MAKE libbz2.a CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+      $AD_MAKE bzip2 CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+      $AD_MAKE bzip2recover CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+      
+      CheckStatus "bzip2"
+      
+      InstallBzip $AD_BZIP_FULL/build/$1
+    else
+      $AD_MAKE CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+      
+      CheckStatus "bzip2"
+      $AD_MAKE install CFLAGS="$TCFLAGS" PREFIX=$AD_BZIP_FULL/build/$1 CC="$AD_CC"
+    fi
+    
+    
+    
+    #EndBuild $AD_BZIP $AD_BZIP_DIR $1
+  fi
 }
+
+#permissive with advertising
+#https://freetype.org/index.html
+#requires zlib, libpng, bzip2, harfbuzz(currently disabled)
+BuildFreetype()
+{
+  if [ $5 = "free" ]; then
+    echo "Building Freetype"
+    StartBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
+    $AD_FREETYPE_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
+    CheckStatus "Freetype"
+    #Adding cc and cxx here causes freetype to not compile
+    $AD_MAKE -j"$AD_THREADS"
+    CheckStatus "Freetype"
+    $AD_MAKE install
+    EndBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
+  fi
+}
+
+
 
 #combiniation of lgpl and gpl
 #depends on libpng, zlib, sdl
@@ -1233,7 +1299,7 @@ BuildSdl2()
 #permissive
 #compile error in config https://github.com/Linuxbrew/legacy-linuxbrew/issues/172
 #seems to use sdl lib location for webp
-
+#depends jpeg(turbo) zlib, xz, libtiff, webp
 BuildSdl2Image()
 {
   if [ $5 = "free" ]; then
@@ -1315,6 +1381,7 @@ BuildSdl2Image()
   fi 
 }
 
+#depends freetype
 BuildSdl2Ttf()
 {
   
@@ -1426,7 +1493,7 @@ BuildSdl2Net()
 BuildAll()
 {
 
-  
+  echo Build
   EXEC_DIR=$AD_OS/$AD_COMPILER/$2/$3-$1
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_ZLIB" = true ]
@@ -1468,15 +1535,15 @@ BuildAll()
   then
     BuildGiflib $EXEC_DIR $1 $2 $3 $4
   fi
+  
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_BZIP" = true ]
+  then
+    BuildBzip $EXEC_DIR $1 $2 $3 $4
+  fi
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_FREETYPE" = true ]
   then
     BuildFreetype $EXEC_DIR $1 $2 $3 $4
-  fi
-
-  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBBZIP" = true ]
-  then
-    BuildBzip $EXEC_DIR $1 $2 $3 $4
   fi
 
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_LIBBPG" = true ]
