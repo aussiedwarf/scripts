@@ -476,7 +476,7 @@ BuildZlib()
         
       else
 
-        CC="$AD_CC" $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build --eprefix=$AD_ZLIB_FULL/build/$1 $CONFIG_OPT
+        CC="$AD_CC" $AD_ZLIB_FULL/./configure $STATIC --prefix=$AD_ZLIB_FULL/build/$1 --eprefix=$AD_ZLIB_FULL/build/$1 $CONFIG_OPT
       
         CheckStatus "Zlib"
         echo Make
@@ -546,7 +546,7 @@ BuildLibpng()
       #need to copy folder as ./configure does not copy
       
       
-      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
+      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/$1/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
       
       
       
@@ -665,7 +665,7 @@ BuildLibjpeg()
     
     StartBuild $AD_LIBJPG $AD_LIBJPG_DIR $1
     
-    $AD_LIBJPG_FULL/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG_FULL/build --exec-prefix=$AD_LIBJPG_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBJPG_FULL/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG_FULL/build/$1 --exec-prefix=$AD_LIBJPG_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libjpeg"
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "libjpeg"
@@ -732,7 +732,7 @@ BuildLibjpegturbo()
       autoreconf -f -i
       
       
-      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$TCFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
+      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$TCFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build/$1 --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
       
       echo pwd
       
@@ -888,8 +888,16 @@ BuildLibtiff()
       TSHARED="--enable-shared"
     fi
     
+    #libtiff already has build folder with contents. these will get moved back
+    #rm $AD_LIBTIFF_FULL/build/CMakeLists.txt
+    #rm $AD_LIBTIFF_FULL/build/Makefile.am
+    #rm $AD_LIBTIFF_FULL/build/Makefile.in
+    #rm $AD_LIBTIFF_FULL/build/README
+    #rm $AD_LIBTIFF_FULL/build/Makefile
+    
     StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
-    $AD_LIBTIFF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --with-zlib-include-dir=$AD_ZLIB_FULL/build/include --with-zlib-lib-dir=$AD_ZLIB_FULL/build/$1/lib --with-jpeg-include-dir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeg-lib-dir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-lzma-include-dir=$AD_XZ_FULL/build/$1/include --with-lzma-lib-dir=$AD_XZ_FULL/build/$1/lib  --prefix=$AD_LIBTIFF_FULL/build/$1 --exec-prefix=$AD_LIBTIFF_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    
+    $AD_LIBTIFF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --with-zlib-include-dir=$AD_ZLIB_FULL/build/$1/include --with-zlib-lib-dir=$AD_ZLIB_FULL/build/$1/lib --with-jpeg-include-dir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeg-lib-dir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-lzma-include-dir=$AD_XZ_FULL/build/$1/include --with-lzma-lib-dir=$AD_XZ_FULL/build/$1/lib  --prefix=$AD_LIBTIFF_FULL/build/$1 --exec-prefix=$AD_LIBTIFF_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libtiff"
 
     #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
@@ -928,8 +936,21 @@ BuildLibtiff()
       fi
     fi
     
+    
     $AD_MAKE install
+    
+    mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/CMakeLists.txt $BASEDIR/temp
+    mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/Makefile.am $BASEDIR/temp
+    mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/Makefile.in $BASEDIR/temp
+    mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/README $BASEDIR/temp
+    
+    
     EndBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
+    
+    mv $BASEDIR/temp/CMakeLists.txt $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build
+    mv $BASEDIR/temp/Makefile.am $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build
+    mv $BASEDIR/temp/Makefile.in $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build
+    mv $BASEDIR/temp/README $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build
     
   fi
 }
@@ -1042,7 +1063,7 @@ BuildLibwebp()
     
     ./autogen.sh
     
-    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/$1/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build/$1 --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libwebp"
     
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
@@ -1093,14 +1114,14 @@ BuildFreetype()
 {
 
   echo "Building Freetype"
-  StartBuild $AD_FREETYPE $AD_FREETYPE_DIR
-  $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
+  StartBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
+  $AD_FREETYPE/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE/build/$1 --exec-prefix=$AD_FREETYPE/build/$AD_EXEC ZLIB_CFLAGS=-I$AD_ZLIB/build/include ZLIB_LIBS=$AD_ZLIB/build/$AD_EXEC BZIP2_CFLAGS=-I$AD_BZIP/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG/build/$AD_EXEC --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
   CheckStatus "Freetype"
   #Adding cc and cxx here causes freetype to not compile
   $AD_MAKE -j"$AD_THREADS"
   CheckStatus "Freetype"
   $AD_MAKE install
-  EndBuild $AD_FREETYPE
+  EndBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
 }
 
 #permissive
@@ -1180,7 +1201,7 @@ BuildSdl2()
         TSHARED="--enable-shared"
       fi
       
-      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build/$1 --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -1228,7 +1249,7 @@ BuildSdl2Image()
       
       if [ $AD_OS = "macos" ]
       then
-          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE_FULL/build --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$AD_EXEC SDL_CFLAGS=-I$AD_SDL2_FULL/build/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$AD_EXEC/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$AD_EXEC/lib LDFLAGS="-L$AD_LIBWEBP/build/$AD_EXEC/lib -L$AD_LIBTIFF/build/$AD_EXEC/lib -L$AD_GIFLIB/build/$AD_EXEC/lib -L$AD_LIBJPG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX"
+          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP/build/$1/lib -L$AD_LIBTIFF/build/$1/lib -L$AD_GIFLIB/build/$1/lib -L$AD_LIBJPG/build/$1/lib -L$AD_SDL2/build/$1/lib -L$AD_LIBPNG/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX"
           CheckStatus "SDL2_image"
           $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
           CheckStatus "SDL2_image"
@@ -1269,7 +1290,7 @@ BuildSdl2Image()
         #Removed as as causes mingw compile to hang when first using libtool as it runs as.exe which does nothing with no input
         # AS="$AD_AS"
         #todo libpng does not seem to place /build/include
-        $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED $TFLAGS --with-sdl-prefix=$AD_SDL2_FULL/build --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 --prefix=$AD_SDL2_IMAGE_FULL/build --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPGTURBO_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_XZ_FULL/build/$1/lib" CPPFLAGS="-I$AD_LIBWEBP_FULL/build/include -I$AD_LIBTIFF_FULL/build/include -I$AD_GIFLIB_FULL/build/include -I$AD_LIBJPGTURBO_FULL/build/include -I$AD_SDL2_FULL/build/include -I$AD_LIBPNG_FULL/build/$1/include" LIBS="-lSDL2" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+        $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED $TFLAGS --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPGTURBO_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_XZ_FULL/build/$1/lib" CPPFLAGS="-I$AD_LIBWEBP_FULL/build/$1/include -I$AD_LIBTIFF_FULL/build/$1/include -I$AD_GIFLIB_FULL/build/$1/include -I$AD_LIBJPGTURBO_FULL/build/$1/include -I$AD_SDL2_FULL/build/$1/include -I$AD_LIBPNG_FULL/build/$1/include" LIBS="-lSDL2 -lz -llzma" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
         CheckStatus "SDL2_image"
         
         $AD_MAKE LIBS="$TLIBS" CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES" -j"$AD_THREADS" V=1
