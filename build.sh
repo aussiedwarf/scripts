@@ -454,9 +454,9 @@ BuildZlib()
         STATIC="--static"
       fi
       
-      CFLAGS=$AD_CFLAGS
+      TCFLAGS=$AD_CFLAGS
       if [ $4 = "debug" ]; then
-        CFLAGS=$AD_CFLAGS_DEBUG
+        TCFLAGS=$AD_CFLAGS_DEBUG
       fi
       
       StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
@@ -470,7 +470,7 @@ BuildZlib()
         
         
         echo Make
-        $AD_MAKE "-f$AD_ZLIB_FULL/win32/Makefile.gcc" CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" -j"$AD_THREADS"
+        $AD_MAKE "-f$AD_ZLIB_FULL/win32/Makefile.gcc" CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" -j"$AD_THREADS"
         CheckStatus "Zlib"
         $AD_MAKE "-fwin32/Makefile.gcc" install DESTDIR="$AD_ZLIB_FULL/build/$1" "$STATIC"
         
@@ -480,7 +480,7 @@ BuildZlib()
       
         CheckStatus "Zlib"
         echo Make
-        $AD_MAKE CFLAGS="$CFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" LD="$AD_CC"
+        $AD_MAKE CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" -j"$AD_THREADS" LD="$AD_CC"
         CheckStatus "Zlib"
         $AD_MAKE install
       
@@ -512,10 +512,10 @@ BuildLibpng()
       msbuild.exe $AD_LIBPNG_FULL/contrib/vstudio/vc14/zlibvc.sln
     
     else
-      FLAGS=""
+      TFLAGS=""
       if [ "$AD_COMPILER" = "mingw" ]
       then
-        FLAGS="$FLAGS --host=mingw32"
+        TFLAGS="$FLAGS --host=mingw32"
       fi
       
       TCFLAGS=$AD_CFLAGS
@@ -545,13 +545,20 @@ BuildLibpng()
       StartBuild $AD_LIBPNG $AD_LIBPNG_DIR $1
       #need to copy folder as ./configure does not copy
       
+      T_AR="AR=$AD_AR"
+      if [ AD_OS="macos" ]
+      then
+        T_AR=""
+      fi
       
-      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/$1/include" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" $FLAGS
+      #  
+      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/$1/include"  $TFLAGS CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
       
       
       
       CheckStatus "libpng"
-      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+      #CC="$AD_CC" CXX="$AD_CXX"
+      $AD_MAKE -j"$AD_THREADS"
 
       #mingw has error compiling so needs to correct pnglibconf.h
       #THen retry building
