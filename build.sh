@@ -1423,27 +1423,73 @@ BuildSdl2Ttf()
   
   if [ $5 = "free" ]; then
     echo "Building SDL2_ttf"
-    StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TLIBS=-lSDL2
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
+      TLIBS="-lmingw32 -lSDL2main $TLIBS -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -lfreetype -lbz2 -lpng -lz"
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
+    StartBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR $1
+    
+    touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
 
     if [ $AD_OS = "macos" ]
     then
 
-      $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+      $AD_SDL2_TTF_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF_FULL/build/$1 --exec-prefix=$AD_SDL2_TTF/build/$1 --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
       CheckStatus "SDL2_image"
       $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
       CheckStatus "SDL2_image"
 
     else
 
-      $AD_SDL2_TTF/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_TTF/build --exec-prefix=$AD_SDL2_TTF/build/$AD_EXEC --with-freetype-prefix=$AD_FREETYPE/build/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE/build/$AD_EXEC/lib --with-sdl-prefix=$AD_SDL2/build --with-sdl-exec-prefix=$AD_SDL2/build/$AD_EXEC CPPFLAGS="-I$AD_FREETYPE/build/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
+      $AD_SDL2_TTF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_SDL2_TTF_FULL/build/$1 --exec-prefix=$AD_SDL2_TTF_FULL/build/$1 --with-freetype-prefix=$AD_FREETYPE_FULL/build/$1/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE_FULL/build/$1/lib --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 CPPFLAGS="-I$AD_FREETYPE_FULL/build/$1/include/freetype2 -I$AD_SDL2_FULL/build/$1/include/SDL2" LIBS="-L$AD_SDL2_FULL/build/$1/lib -L$AD_FREETYPE_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1 $TLIBS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
       CheckStatus "SDL2_image"
-      $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE/build/$AD_EXEC/lib -L$AD_LIBPNG/build/$AD_EXEC/lib -L$AD_SDL2/build/$AD_EXEC/lib -L$AD_BZIP/build/$AD_EXEC/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-      CheckStatus "SDL2_image"
+      
+      if [ "$AD_COMPILER" = "mingw" ]
+      then
+        $AD_MAKE -j"$AD_THREADS"
+        CheckStatus "SDL2_image"
+        
 
+        #rename windows files to unix in .dep foler
+        if cd .deps ; then
+          find . -type f -a \( -name "*.Plo" -o -name "*.Po" \) -a -exec sed -i -- 's/C:/\/mnt\/c/g' {} +
+          cd ../
+        fi
+        
+
+      else
+        $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib" -j"$AD_THREADS"
+        CheckStatus "SDL2_image"
+      fi
     fi
 
     $AD_MAKE install
-    EndBuild $AD_SDL2_TTF
+    EndBuild $AD_SDL2_TTF $AD_SDL2_TTF_DIR $1
   fi
 }
 
