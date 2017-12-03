@@ -826,13 +826,19 @@ BuildXz()
     else
       TSHARED="--enable-shared"
     fi
+    
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
 
     StartBuild $AD_XZ $AD_XZ_DIR $1
     
     touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
     #need to set posix to avoid undefinde sigset when trying with posix threads in mingw
     #-D_POSIX
-    $AD_XZ_FULL/./configure CFLAGS="$TCFLAGS -std=c11" "$TSHARED" "$TSTATIC" $TOPTIONS --prefix="$AD_XZ_FULL/build/$1" --exec-prefix="$AD_XZ_FULL/build/$1" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_XZ_FULL/./configure CFLAGS="$TCFLAGS -std=c11" "$TSHARED" "$TSTATIC" $TOPTIONS --prefix="$AD_XZ_FULL/build/$1" --exec-prefix="$AD_XZ_FULL/build/$1" CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "xz"
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "xz"
