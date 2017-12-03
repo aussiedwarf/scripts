@@ -76,11 +76,16 @@ SetBuild()
   case $1 in
     zlib )          AD_BUILD_ZLIB=true;;
     libpng )        AD_BUILD_LIBPNG=true;;
+    png )           AD_BUILD_LIBPNG=true;;
     libjpeg )       AD_BUILD_LIBJPEG=true;;
+    jpeg )          AD_BUILD_LIBJPEG=true;;
     libjpegturbo )  AD_BUILD_LIBJPEGTURBO=true;;
+    jpegturbo )     AD_BUILD_LIBJPEGTURBO=true;;
     xz )            AD_BUILD_XZ=true;;
     libtiff )       AD_BUILD_LIBTIFF=true;;
+    tiff )          AD_BUILD_LIBTIFF=true;;
     libwebp )       AD_BUILD_LIBWEBP=true;;
+    webp )          AD_BUILD_LIBWEBP=true;;
     giflib )        AD_BUILD_GIFLIB=true;;
     freetype )      AD_BUILD_FREETYPE=true;;
     bzip )          AD_BUILD_BZIP=true;;
@@ -1015,13 +1020,19 @@ BuildGiflib()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_GIFLIB $AD_GIFLIB_DIR $1
     
     touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
     #autoreconf -f -i
     
     
-    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     
     CheckStatus "giflib"
     
@@ -1084,11 +1095,17 @@ BuildLibwebp()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
     
     ./autogen.sh
     
-    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/$1/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build/$1 --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/$1/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build/$1 --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libwebp"
     
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
@@ -1186,6 +1203,12 @@ BuildBzip()
     if [ "$4" = "debug" ]; then
       TCFLAGS=$AD_CFLAGS_DEBUG
     fi
+    
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
 
     #test fails for mingw in maikefile since if tries to find ./bzip2 rather than bzip2.exe
     #hence we skip the test for mingw
@@ -1200,7 +1223,7 @@ BuildBzip()
       
       InstallBzip $AD_BZIP_FULL/build/$1
     else
-      $AD_MAKE CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+      $AD_MAKE CFLAGS="$TCFLAGS" CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
       
       CheckStatus "bzip2"
       $AD_MAKE install CFLAGS="$TCFLAGS" PREFIX=$AD_BZIP_FULL/build/$1 CC="$AD_CC"
@@ -1247,6 +1270,12 @@ BuildFreetype()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
     
     if [ "$AD_COMPILER" = "mingw" ]
@@ -1255,7 +1284,7 @@ BuildFreetype()
 
     fi
     
-    $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "Freetype"
     
     #Adding cc and cxx here causes freetype to not compile
@@ -1328,7 +1357,13 @@ BuildSdl2()
         TSHARED="--enable-shared"
       fi
       
-      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build/$1 --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+      T_AR="AR=$AD_AR"
+      if [ AD_OS="macos" ]
+      then
+        T_AR=""
+      fi
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build/$1 --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" $T_AR AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
@@ -1336,7 +1371,7 @@ BuildSdl2()
       #--with-esd-prefix=PFX   Prefix where ESD is installed (optional)
       #--with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
 
-      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" AR="$AD_AR" AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES" -j"$AD_THREADS" V=1
+      $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" $T_AR AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES" -j"$AD_THREADS" V=1
 
       CheckStatus "SDL2"
       
@@ -1371,22 +1406,32 @@ BuildSdl2Image()
       StartBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR $1
       EndBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR $1
     else
-      #cd $AD_SDL2_IMAGE
+      
+      TCFLAGS=$AD_CFLAGS
+      if [ "$4" = "debug" ]; then
+        TCFLAGS=$AD_CFLAGS_DEBUG
+      fi
+      
+      TSTATIC="--disable-static"
+      TSHARED="--disable-shared"
+      if [ "$2" = "static" ]; then
+        TSTATIC="--enable-static"
+      else
+        TSHARED="--enable-shared"
+      fi
+      
       StartBuild $AD_SDL2_IMAGE $AD_SDL2_IMAGE_DIR $1
       
       if [ $AD_OS = "macos" ]
       then
-          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --enable-static --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP/build/$1/lib -L$AD_LIBTIFF/build/$1/lib -L$AD_GIFLIB/build/$1/lib -L$AD_LIBJPG/build/$1/lib -L$AD_SDL2/build/$1/lib -L$AD_LIBPNG/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX"
+          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP/build/$1/lib -L$AD_LIBTIFF/build/$1/lib -L$AD_GIFLIB/build/$1/lib -L$AD_LIBJPG/build/$1/lib -L$AD_SDL2/build/$1/lib -L$AD_LIBPNG/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX"
           CheckStatus "SDL2_image"
           $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
           CheckStatus "SDL2_image"
 
       else
       
-        TCFLAGS=$AD_CFLAGS
-        if [ "$4" = "debug" ]; then
-          TCFLAGS=$AD_CFLAGS_DEBUG
-        fi
+        
         
         TLIBS=-lSDL2
         TFLAGS=""
@@ -1403,13 +1448,7 @@ BuildSdl2Image()
           TLIBS="-lmingw32 $TLIBS -lSDL2main"
         fi
         
-        TSTATIC="--disable-static"
-        TSHARED="--disable-shared"
-        if [ "$2" = "static" ]; then
-          TSTATIC="--enable-static"
-        else
-          TSHARED="--enable-shared"
-        fi
+        
         
         touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
         
