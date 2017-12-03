@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
+#./build.sh -c clang -o macos -b libjpegturbo 2>&1 | tee output.log
 #./build.sh -c mingw -b giflib 2>&1 | tee output.log
 #./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
@@ -485,7 +486,7 @@ BuildZlib()
         $AD_MAKE install
       
       fi
-      #EndBuild "$AD_ZLIB_FULL"
+      
       EndBuild $AD_ZLIB $AD_ZLIB_DIR $1
     fi
   fi
@@ -733,15 +734,20 @@ BuildLibjpegturbo()
         TSHARED="--enable-shared"
       fi
       
+      T_AR="AR=$AD_AR"
+      if [ AD_OS="macos" ]
+      then
+        T_AR=""
+      fi
+      
       StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
       
       
       autoreconf -f -i
       
       
-      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$TCFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build/$1 --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
+      $AD_LIBJPGTURBO_FULL/./configure CFLAGS="$TCFLAGS" "$TSHARED" "$TSTATIC" --prefix=$AD_LIBJPGTURBO_FULL/build/$1 --exec-prefix=$AD_LIBJPGTURBO_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" NASM="$AD_NASM"
       
-      echo pwd
       
       CheckStatus "turbo libjpeg"
       $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
