@@ -19,6 +19,11 @@ while [ "$1" != "" ]; do
       T=-LC:
       T="$T${1:8}"
       COMMAND="$COMMAND $T"
+    elif [[ $1 == -o/mnt/* ]]
+    then
+      T=-oC:
+      T="$T${1:8}"
+      COMMAND="$COMMAND $T"
     else
       COMMAND="$COMMAND $1"
     fi

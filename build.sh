@@ -235,7 +235,7 @@ AD_GIFLIB_DIR=giflib-5.1.4
 AD_GIFLIB=giflib
 AD_GIFLIB_FULL="$AD_DIR/$AD_GIFLIB/$AD_GIFLIB_DIR"
 
-AD_FREETYPE_DIR=freetype-2.8
+AD_FREETYPE_DIR=freetype-2.8.1
 AD_FREETYPE=freetype
 AD_FREETYPE_FULL="$AD_DIR/$AD_FREETYPE/$AD_FREETYPE_DIR"
 
@@ -1183,7 +1183,7 @@ BuildBzip()
     
     
     
-    #EndBuild $AD_BZIP $AD_BZIP_DIR $1
+    EndBuild $AD_BZIP $AD_BZIP_DIR $1
   fi
 }
 
@@ -1194,9 +1194,45 @@ BuildFreetype()
 {
   if [ $5 = "free" ]; then
     echo "Building Freetype"
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    TFLAGS=""
+    TOPTIONS=""
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      echo Arch "$3"
+      if [ "$3" = "x64" ]
+      then
+        TFLAGS="--host=x86_64-w64-mingw32"
+      else
+        TFLAGS="--host=i686-w64-mingw32"
+      fi
+
+    fi
+    
+    TSTATIC="--disable-static"
+    TSHARED="--disable-shared"
+    if [ $2 = "static" ]; then
+      TSTATIC="--enable-static"
+    else
+      TSHARED="--enable-shared"
+    fi
+    
     StartBuild $AD_FREETYPE $AD_FREETYPE_DIR $1
-    $AD_FREETYPE_FULL/./configure CFLAGS="$AD_CFLAGS" --disable-shared --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$AD_EXEC/include BZIP2_LIBS=$AD_BZIP/build/$AD_EXEC/lib LIBPNG_CFLAGS=-I$AD_LIBPNG/build/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX"
+    
+    if [ "$AD_COMPILER" = "mingw" ]
+    then
+      sed -i 's/(SEP),$(APINAMES_EXE)/(SEP),translate.sh objs\/apinames.exe/' $AD_FREETYPE_FULL/builds/exports.mk
+
+    fi
+    
+    $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "Freetype"
+    
     #Adding cc and cxx here causes freetype to not compile
     $AD_MAKE -j"$AD_THREADS"
     CheckStatus "Freetype"
