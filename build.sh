@@ -1090,11 +1090,17 @@ BuildLibwebp()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
     
     ./autogen.sh
     
-    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/$1/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build/$1 --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBWEBP_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --enable-png --with-jpegincludedir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeglibdir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-tiffincludedir=$AD_LIBTIFF_FULL/build/$1/include --with-tifflibdir=$AD_LIBTIFF_FULL/build/$1/lib --with-gifincludedir=$AD_GIFLIB_FULL/build/$1/include  --with-giflibdir=$AD_GIFLIB_FULL/build/$1/lib --with-pngincludedir=$AD_LIBPNG_FULL/build/$1/include --with-pnglibdir=$AD_LIBPNG_FULL/build/$1/lib --prefix=$AD_LIBWEBP_FULL/build/$1 --exec-prefix=$AD_LIBWEBP_FULL/build/$1 LDFLAGS="-L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib" LIBS="-lm -lpng -lgif -lz" CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libwebp"
     
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
