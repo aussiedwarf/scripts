@@ -907,6 +907,12 @@ BuildLibtiff()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     #libtiff already has build folder with contents. these will get moved back
     #rm $AD_LIBTIFF_FULL/build/CMakeLists.txt
     #rm $AD_LIBTIFF_FULL/build/Makefile.am
@@ -916,7 +922,7 @@ BuildLibtiff()
     
     StartBuild $AD_LIBTIFF $AD_LIBTIFF_DIR $1
     
-    $AD_LIBTIFF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --with-zlib-include-dir=$AD_ZLIB_FULL/build/$1/include --with-zlib-lib-dir=$AD_ZLIB_FULL/build/$1/lib --with-jpeg-include-dir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeg-lib-dir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-lzma-include-dir=$AD_XZ_FULL/build/$1/include --with-lzma-lib-dir=$AD_XZ_FULL/build/$1/lib  --prefix=$AD_LIBTIFF_FULL/build/$1 --exec-prefix=$AD_LIBTIFF_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBTIFF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --with-zlib-include-dir=$AD_ZLIB_FULL/build/$1/include --with-zlib-lib-dir=$AD_ZLIB_FULL/build/$1/lib --with-jpeg-include-dir=$AD_LIBJPGTURBO_FULL/build/$1/include --with-jpeg-lib-dir=$AD_LIBJPGTURBO_FULL/build/$1/lib --with-lzma-include-dir=$AD_XZ_FULL/build/$1/include --with-lzma-lib-dir=$AD_XZ_FULL/build/$1/lib  --prefix=$AD_LIBTIFF_FULL/build/$1 --exec-prefix=$AD_LIBTIFF_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libtiff"
 
     #--with-jbig-include-dir=DIR location of JBIG-KIT headers which are GPL
