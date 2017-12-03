@@ -1015,13 +1015,19 @@ BuildGiflib()
       TSHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_GIFLIB $AD_GIFLIB_DIR $1
     
     touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
     #autoreconf -f -i
     
     
-    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     
     CheckStatus "giflib"
     
