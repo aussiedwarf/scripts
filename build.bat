@@ -1,6 +1,6 @@
 
 
-IF "%1"=="mingw" SET PATH=%PATH%;C:\dev\mingw-w64\x86_64-7.1.0-posix-sjlj-rt_v5-rev2\mingw64\bin
+IF "%1"=="mingw" SET PATH=%PATH%;D:\apps\mingw\x86_64-7.2.0-posix-sjlj-rt_v5-rev1\mingw64\bin
   
 IF "%1"=="clang" SET PATH=%PATH%;C:\dev\LLVM\bin
 
