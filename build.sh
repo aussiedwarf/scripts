@@ -149,6 +149,16 @@ case "$AD_OS" in
               AD_CXX=cl.exe
               AD_MAKE=make
               AD_AR=link.exe
+              ;;
+  android )   AD_ARCH=armeabi
+              AD_COMPILER=clang
+              AD_PROFILE=release
+              AD_CC=clang
+              AD_CXX=clang++
+              AD_MAKE=make
+              AD_AR=llvm-ar
+              AD_LD=llvm-link
+              AD_AS=llvm-as
 esac
 
 
