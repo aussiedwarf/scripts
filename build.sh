@@ -273,7 +273,8 @@ AD_SDL2_NET=SDL
 AD_SDL2_NET_FULL="$AD_DIR/$AD_SDL2_NET/$AD_SDL2_NET_DIR"
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
-AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O3 -fomit-frame-pointer -funroll-loops"
+AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O2 -fomit-frame-pointer "
+#-O2 -funroll-loops
 AD_CFLAGS_DEBUG="-D_FILE_OFFSET_BITS=64 -Wall -g"
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
@@ -1781,7 +1782,7 @@ BuildProfile()
   BuildLicense $1 $2 "release"
   
   #echo "Building Debug libs"
-  #BuildLicense $1 $2 "debug"
+  BuildLicense $1 $2 "debug"
 }
 
 # $1 arch
