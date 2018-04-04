@@ -244,8 +244,8 @@ AD_LIBTIFF=libtiff
 AD_LIBTIFF_FULL="$AD_DIR/$AD_LIBTIFF/$AD_LIBTIFF_DIR"
 
 #todo change to version from git
-AD_LIBWEBP_DIR=master
-AD_LIBWEBP=webp
+AD_LIBWEBP_DIR=libwebp-0.6.0
+AD_LIBWEBP=libwebp
 AD_LIBWEBP_FULL="$AD_DIR/$AD_LIBWEBP/$AD_LIBWEBP_DIR"
 
 AD_GIFLIB_DIR=giflib-5.1.4
@@ -1158,6 +1158,8 @@ BuildLibwebp()
     then
       T_AR=""
     fi
+    
+    echo "Webp: $AD_LIBWEBP_FULL/build/$1"
     
     StartBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
     
