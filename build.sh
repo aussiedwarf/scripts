@@ -350,6 +350,14 @@ then
     echo "PATH: $PATH"
 fi
 
+echo "OS: $AD_OS"
+
+if [ "$AD_OS" = "macos" ]
+then
+  AD_CFLAGS="$AD_CFLAGS -mmacosx-version-min=10.10"
+  AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -mmacosx-version-min=10.10"
+fi
+
 
 echo "CFLAGS: $AD_CFLAGS"
 
@@ -720,9 +728,15 @@ BuildLibjpeg()
       SHARED="--enable-shared"
     fi
     
+    T_AR="AR=$AD_AR"
+    if [ AD_OS="macos" ]
+    then
+      T_AR=""
+    fi
+    
     StartBuild $AD_LIBJPG $AD_LIBJPG_DIR $1
     
-    $AD_LIBJPG_FULL/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG_FULL/build/$1 --exec-prefix=$AD_LIBJPG_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_LIBJPG_FULL/./configure CFLAGS="$CFLAGS" "$SHARED" --prefix=$AD_LIBJPG_FULL/build/$1 --exec-prefix=$AD_LIBJPG_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     CheckStatus "libjpeg"
     $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
     CheckStatus "libjpeg"
@@ -1468,7 +1482,7 @@ BuildSdl2Image()
       
       if [ $AD_OS = "macos" ]
       then
-          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPG_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX"
+          $AD_SDL2_IMAGE_FULL/./configure CFLAGS="$TCFLAGS" $TSTATIC $TSHARED --prefix=$AD_SDL2_IMAGE_FULL/build/$1 --exec-prefix=$AD_SDL2_IMAGE_FULL/build/$1 SDL_CFLAGS=-I$AD_SDL2_FULL/build/$1/include/SDL2 SDL_LIBS=-L$AD_SDL2_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=-L$AD_LIBPNG_FULL/build/$1/lib LIBWEBP_CFLAGS=-I$AD_LIBWEBP_FULL/build/$1/include LIBWEBP_LIBS=-L$AD_LIBWEBP_FULL/build/$1/lib LDFLAGS="-L$AD_LIBWEBP_FULL/build/$1/lib -L$AD_LIBTIFF_FULL/build/$1/lib -L$AD_GIFLIB_FULL/build/$1/lib -L$AD_LIBJPGTURBO_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX"
           CheckStatus "SDL2_image"
           $AD_MAKE LIBS="-lSDL2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
           CheckStatus "SDL2_image"
