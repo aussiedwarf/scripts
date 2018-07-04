@@ -1,7 +1,7 @@
 #!/bin/sh
 sudo apt-get update
 
-sudo apt-get install -y git wget build-essential clang autoconf autoconf-archive m4 libtool
+sudo apt-get install -y git wget make g++ build-essential autoconf autoconf-archive m4 libtool libgl1-mesa-dev
 
 #macosx
 #/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
