@@ -46,9 +46,9 @@ fi
 #libtiff
 #http://www.simplesystems.org/libtiff/
 mkdir thirdparty/libtiff
-if [ ! -f thirdparty/libtiff/tiff-4.0.8.tar.gz ]; then
-  wget -O thirdparty/libtiff/tiff-4.0.8.tar.gz ftp://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz
-  tar -xf thirdparty/libtiff/tiff-4.0.8.tar.gz -C thirdparty/libtiff/
+if [ ! -f thirdparty/libtiff/tiff-4.0.9.tar.gz ]; then
+  wget -O thirdparty/libtiff/tiff-4.0.9.tar.gz https://download.osgeo.org/libtiff/tiff-4.0.9.tar.gz
+  tar -xf thirdparty/libtiff/tiff-4.0.9.tar.gz -C thirdparty/libtiff/
 fi
 
 
@@ -76,8 +76,11 @@ if [ ! -f thirdparty/freetype/freetype-2.8.1.tar.bz2 ]; then
 fi
 
 #webp
-git clone https://chromium.googlesource.com/webm/libwebp thirdparty/webp/master
-
+git clone https://chromium.googlesource.com/webm/libwebp thirdparty/libwebp/libwebp-1.0.0
+cd thirdparty/libwebp/libwebp-1.0.0
+git branch -v -a
+git checkout -b 1.0.0 origin/1.0.0
+cd ../../../
 #SDL1
 
 #SDL2
