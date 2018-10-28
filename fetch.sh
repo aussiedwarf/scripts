@@ -16,9 +16,9 @@ fi
 #http://www.libpng.org/pub/png/libpng.html
 #md5 e01be057a9369183c959b793a685ad15
 mkdir thirdparty/libpng
-if [ ! -f thirdparty/libpng/libpng-1.6.32.tar.xz ]; then
-  wget -O thirdparty/libpng/libpng-1.6.32.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.32.tar.xz
-  tar -xf thirdparty/libpng/libpng-1.6.32.tar.xz -C thirdparty/libpng/
+if [ ! -f thirdparty/libpng/libpng-1.6.35.tar.xz ]; then
+  wget -O thirdparty/libpng/libpng-1.6.35.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.35.tar.xz
+  tar -xf thirdparty/libpng/libpng-1.6.35.tar.xz -C thirdparty/libpng/
 fi
 
 #http://www.ijg.org/
@@ -30,17 +30,17 @@ fi
 
 #https://libjpeg-turbo.org/
 mkdir thirdparty/libjpeg-turbo
-if [ ! -f thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz ]; then
-  wget -O thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.2/libjpeg-turbo-1.5.2.tar.gz
-  tar -xf thirdparty/libjpeg-turbo/libjpeg-turbo-1.5.2.tar.gz -C thirdparty/libjpeg-turbo/
+if [ ! -f thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz ]; then
+  wget -O thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz https://downloads.sourceforge.net/project/libjpeg-turbo/2.0.0/libjpeg-turbo-2.0.0.tar.gz
+  tar -xf thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz -C thirdparty/libjpeg-turbo/
 fi
 
 #xz
 #https://tukaani.org/xz/
 mkdir thirdparty/xz
-if [ ! -f thirdparty/xz/xz-5.2.3.tar.xz ]; then
-  wget -O thirdparty/xz/xz-5.2.3.tar.xz https://tukaani.org/xz/xz-5.2.3.tar.xz
-  tar -xf thirdparty/xz/xz-5.2.3.tar.xz -C thirdparty/xz/
+if [ ! -f thirdparty/xz/xz-5.2.4.tar.xz ]; then
+  wget -O thirdparty/xz/xz-5.2.4.tar.xz https://tukaani.org/xz/xz-5.2.4.tar.xz
+  tar -xf thirdparty/xz/xz-5.2.4.tar.xz -C thirdparty/xz/
 fi
 
 #libtiff
@@ -63,16 +63,16 @@ fi
 #md5: 00b516f4704d4a7cb50a1d97e6e8e15b
 mkdir thirdparty/bzip2
 if [ ! -f thirdparty/bzip2/bzip2-1.0.6.tar.gz ]; then
-  wget -O thirdparty/bzip2/bzip2-1.0.6.tar.gz http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+  wget -O thirdparty/bzip2/bzip2-1.0.6.tar.gz https://web.archive.org/web/20180624184806/http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
   tar -xf thirdparty/bzip2/bzip2-1.0.6.tar.gz -C thirdparty/bzip2/
 fi
 
 #https://freetype.org/index.html
 #https://download.savannah.gnu.org/releases/freetype/
 mkdir thirdparty/freetype
-if [ ! -f thirdparty/freetype/freetype-2.8.1.tar.bz2 ]; then
-  wget -O thirdparty/freetype/freetype-2.8.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.8.1.tar.bz2
-  tar -xf thirdparty/freetype/freetype-2.8.1.tar.bz2 -C thirdparty/freetype
+if [ ! -f thirdparty/freetype/freetype-2.9.1.tar.bz2 ]; then
+  wget -O thirdparty/freetype/freetype-2.9.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
+  tar -xf thirdparty/freetype/freetype-2.9.1.tar.bz2 -C thirdparty/freetype
 fi
 
 #webp
@@ -86,14 +86,14 @@ cd ../../../
 #SDL2
 mkdir thirdparty/SDL
 
-if [ ! -f thirdparty/SDL/SDL2-2.0.7.tar.gz ]; then
-  wget -O thirdparty/SDL/SDL2-2.0.7.tar.gz https://www.libsdl.org/release/SDL2-2.0.7.tar.gz
-  tar -xf thirdparty/SDL/SDL2-2.0.7.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2-2.0.8.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2-2.0.8.tar.gz https://www.libsdl.org/release/SDL2-2.0.8.tar.gz
+  tar -xf thirdparty/SDL/SDL2-2.0.8.tar.gz -C thirdparty/SDL/
 fi
 
-if [ ! -f thirdparty/SDL/SDL2_image-2.0.1.tar.gz  ]; then
-  wget -O thirdparty/SDL/SDL2_image-2.0.1.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
-  tar -xf thirdparty/SDL/SDL2_image-2.0.1.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_image-2.0.3.tar.gz  ]; then
+  wget -O thirdparty/SDL/SDL2_image-2.0.3.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.3.tar.gz
+  tar -xf thirdparty/SDL/SDL2_image-2.0.3.tar.gz -C thirdparty/SDL/
 fi
 
 if [ ! -f thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz ]; then
@@ -109,8 +109,8 @@ fi
 #libbpg
 #https://bellard.org/bpg/
 mkdir thirdparty/libbpg
-if [ ! -f thirdparty/libbpg/libbpg-0.9.7.tar.gz ]; then
-  wget -O thirdparty/libbpg/libbpg-0.9.7.tar.gz https://bellard.org/bpg/libbpg-0.9.7.tar.gz
-  tar -xf thirdparty/libbpg/libbpg-0.9.7.tar.gz -C thirdparty/libbpg/
+if [ ! -f thirdparty/libbpg/libbpg-0.9.8.tar.gz ]; then
+  wget -O thirdparty/libbpg/libbpg-0.9.8.tar.gz https://bellard.org/bpg/libbpg-0.9.8.tar.gz
+  tar -xf thirdparty/libbpg/libbpg-0.9.8.tar.gz -C thirdparty/libbpg/
 fi
 
