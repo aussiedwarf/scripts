@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
-#./build.sh -c clang -o macos -b libjpegturbo 2>&1 | tee output.log
+#./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
 #./build.sh -c mingw -b giflib 2>&1 | tee output.log
 #./build.sh -c msvc -b zlib 2>&1 | tee output.log
 #
@@ -266,7 +266,7 @@ AD_LIBBPG_FULL="$AD_DIR/$AD_LIBBPG/$AD_LIBBPG_DIR"
 
 #AD_JBIGKIT=$AD_DIR/
 
-AD_SDL2_DIR=SDL2-2.0.8
+AD_SDL2_DIR=SDL2-2.0.9
 AD_SDL2=SDL
 AD_SDL2_FULL="$AD_DIR/$AD_SDL2/$AD_SDL2_DIR"
 
@@ -354,8 +354,8 @@ echo "OS: $AD_OS"
 
 if [ "$AD_OS" = "macos" ]
 then
-  AD_CFLAGS="$AD_CFLAGS -mmacosx-version-min=10.10"
-  AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -mmacosx-version-min=10.10"
+  AD_CFLAGS="$AD_CFLAGS -mmacosx-version-min=10.9"
+  AD_CFLAGS_DEBUG="$AD_CFLAGS_DEBUG -mmacosx-version-min=10.9"
 fi
 
 
@@ -578,7 +578,7 @@ BuildLibpng()
       fi
       
       #  
-      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/$1/include"  $TFLAGS CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+      $AD_LIBPNG_FULL/./configure CFLAGS="$TCFLAGS" "$SSE" "$SHARED" "$STATIC" LDFLAGS=-L$AD_ZLIB_FULL/build/$1/lib --prefix=$AD_LIBPNG_FULL/build/$1 --exec-prefix=$AD_LIBPNG_FULL/build/$1 CPPFLAGS="-I$AD_ZLIB_FULL/build/$1/include" $TFLAGS CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
       
       
       
@@ -755,8 +755,31 @@ BuildLibjpeg()
   fi
 }
 
-
 BuildLibjpegturbo()
+{
+  if [ $5 = "free" ]; then
+  
+    echo building turbo libjpeg
+    
+    if [ "$AD_COMPILER" == "msvc" ]
+    then
+    
+      StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      
+      EndBuild $AD_LIBJPGTURBO
+    else
+
+      StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+      cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
+      make
+      EndBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
+    fi
+    
+  fi
+}
+
+#old method to build turbo before it moved to cmake
+BuildLibjpegturboAutoreconf()
 {
   if [ $5 = "free" ]; then
   

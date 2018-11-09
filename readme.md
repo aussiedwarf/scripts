@@ -14,17 +14,28 @@ Windows VS2015/VS2017/MingW/Clang TODO
   8.1 x86/x64 TODO
   7 x86/x64 TODO
 MacOS Clang 
-  Sierra x64
-  El Capitan x64
-  Yosmite x64
+  10.14 Mojave x64
+  10.13 High Sierra x64
+  10.12 Sierra x64
+  10.11 El Capitan x64
+  10.10 Yosmite x64
+  10.9  Mavericks x64
 Linux GCC/Clang TODO
   Ubuntu/Mint x86/x64 TODO
   Fedora x86/x64 TODO
   Raspbian arm TODO
   ?Debian,CentOS,OpenSuse,Arch?
 iOS arm64 TODO
-Android arm/arm64 TODO
+  ios 12+
+  iphone5s++
+Android arm-v7/arm64 TODO
+  android p
+  android 8
+  android 7
+  android 6
+  android 5
 Emscripten TODO
+Webassembly
 
 Files and Dependencies
 

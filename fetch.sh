@@ -86,9 +86,9 @@ cd ../../../
 #SDL2
 mkdir thirdparty/SDL
 
-if [ ! -f thirdparty/SDL/SDL2-2.0.8.tar.gz ]; then
-  wget -O thirdparty/SDL/SDL2-2.0.8.tar.gz https://www.libsdl.org/release/SDL2-2.0.8.tar.gz
-  tar -xf thirdparty/SDL/SDL2-2.0.8.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2-2.0.9.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2-2.0.9.tar.gz https://www.libsdl.org/release/SDL2-2.0.9.tar.gz
+  tar -xf thirdparty/SDL/SDL2-2.0.9.tar.gz -C thirdparty/SDL/
 fi
 
 if [ ! -f thirdparty/SDL/SDL2_image-2.0.3.tar.gz  ]; then
