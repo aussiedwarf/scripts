@@ -41,10 +41,13 @@ Files and Dependencies
 
 
 zlib
-libpng
+libpng zlib
 libjpeg
-lzma
-libtiff zlib libjpeg lzma
+libjpeg-turbo
+xz
+giflib
+?lzma?
+libtiff zlib libjpeg ?lzma?
 libgif
 bzip
 freetype zlib bzip libpng 
@@ -55,6 +58,9 @@ SDL2_ttf freetype
 SDL2_net
 SDL2_image libpng, libz, libtiff, libjpeg, webp
 glew2.0
+libbpg
+?mozjpeg?
+?pngcrush?
 
 
 On Ubuntu the folliwing commands are needed

@@ -286,6 +286,10 @@ AD_SDL2_NET_FULL="$AD_DIR/$AD_SDL2_NET/$AD_SDL2_NET_DIR"
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O2 -fomit-frame-pointer "
 #-O2 -funroll-loops
 AD_CFLAGS_DEBUG="-D_FILE_OFFSET_BITS=64 -Wall -g"
+
+AD_LDFLAGS=""
+
+AD_LDFLAGS_DEBUG=""
 # -msse4.1 -msse4.2 -msse4
 # -frename-registers not for clang
 
@@ -343,8 +347,11 @@ fi
 
 if [ "$AD_COMPILER" = "msvc14" ] || [ "$AD_COMPILER" = "msvc15" ]
 then
-  AD_CFLAGS="/O2"
-  AD_CFLAGS_DEBUG="/Od"
+  AD_CFLAGS="-nologo -MD -W3 -O2 -Oy-"
+  AD_CFLAGS_DEBUG="-nologo -Od -MDd -W3 -Z7"
+  AD_LDFLAGS="/nologo"
+  AD_LDFLAGS_DEBUG="/nologo /debug"
+  AD_MAKE="nmake"
   
   export PATH="$PATH:$BASEDIR"
     echo "PATH: $PATH"
@@ -443,33 +450,43 @@ BuildZlib()
       echo COMPILE MSVC
       TPLATFORM=x64
       TCONFIG=Release
+	  TCFLAGS=$AD_CFLAGS
+	  TLDFLAGS=$AD_LDFLAGS
       
       if [ $3 = "x86" ]; then
         TPLATFORM=Win32
+		TCFLAGS="-DASMV -DASMINF LOC=\"-DASMV -DASMINF\" OBJA=\"inffas32.obj match686.obj\""
+      fi
+	  if [ $3 = "x64" ]; then
+        TCFLAGS="-DASMV -DASMINF AS=ml64 LOC=\"-DASMV -DASMINF -I.\" OBJA=\"inffasx64.obj gvmat64.obj inffas8664.obj\""
       fi
       
       if [ $4 = "debug" ]; then
         TCONFIG="Debug"
+		TCFLAGS=$AD_CFLAGS_DEBUG
+		TLDFLAGS=$AD_LDFLAGS_DEBUG
       fi
       
       StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
       
       #copy vsproject
-      cp $BASEDIR/thirdparty/$AD_ZLIB/zlibstat.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibstat.vcxproj
-      cp $BASEDIR/thirdparty/$AD_ZLIB/zlibvc.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibvc.vcxproj
+      #cp $BASEDIR/thirdparty/$AD_ZLIB/zlibstat.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibstat.vcxproj
+      #cp $BASEDIR/thirdparty/$AD_ZLIB/zlibvc.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibvc.vcxproj
       
-      translate.sh MSBuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln /p:Configuration="$TCONFIG" /p:Platform="$TPLATFORM"
+      #translate.sh MSBuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln /p:Configuration="$TCONFIG" /p:Platform="$TPLATFORM"
+	  
+	  $AD_MAKE "-f $AD_ZLIB_FULL/win32/Makefile.msc" CFLAGS="$TCFLAGS" LDFLAGS="$TLDFLAGS"
       
-      TSTATFOLDER=ZlibStatRelease
-      TDLLFOLDER=ZlibDllRelease
-      if [ $4 == "debug" ] || [ $4 == "debug-static" ] || [ $4 == "debug-shared" ]; then
-        TSTATFOLDER=ZlibStatDebug
-        TDLLFOLDER=ZlibDllDebug
-      fi
+      #TSTATFOLDER=ZlibStatRelease
+      #TDLLFOLDER=ZlibDllRelease
+      #if [ $4 == "debug" ] || [ $4 == "debug-static" ] || [ $4 == "debug-shared" ]; then
+      #  TSTATFOLDER=ZlibStatDebug
+      #  TDLLFOLDER=ZlibDllDebug
+      #fi
       
       #copy build
-      test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/$TSTATFOLDER "$AD_ZLIB_FULL/build/$1"
-      test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/ $TDLLFOLDER "$AD_ZLIB_FULL/build/$1"
+      #test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/$TSTATFOLDER "$AD_ZLIB_FULL/build/$1"
+      #test -d "$AD_ZLIB_FULL/build/$1" || mkdir -p "$AD_ZLIB_FULL/build/$1" && cp -a $AD_ZLIB_FULL/contrib/vstudio/vc14/$TPLATFORM/ $TDLLFOLDER "$AD_ZLIB_FULL/build/$1"
       
       EndBuild $AD_ZLIB $AD_ZLIB_DIR $1
       
