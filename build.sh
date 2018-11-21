@@ -3,7 +3,7 @@ set -x #echo on
 #./build.sh -c clang -o ubuntu16.04 -a x64
 #./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
 #./build.sh -c mingw -b giflib 2>&1 | tee output.log
-#./build.sh -c msvc -b zlib 2>&1 | tee output.log
+# ./build.sh -c msvc15 -a x64 -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
 # shared_all      shared lib linked to shared libs
@@ -143,7 +143,7 @@ case "$AD_OS" in
               AD_AR=ar
               ;;
   windows )   AD_ARCH=x64
-              AD_COMPILER=msvc14
+              AD_COMPILER=msvc15
               AD_PROFILE=release
               AD_CC=cl.exe
               AD_CXX=cl.exe
@@ -347,11 +347,17 @@ fi
 
 if [ "$AD_COMPILER" = "msvc14" ] || [ "$AD_COMPILER" = "msvc15" ]
 then
-  AD_CFLAGS="-nologo -MD -W3 -O2 -Oy-"
-  AD_CFLAGS_DEBUG="-nologo -Od -MDd -W3 -Z7"
+  AD_CFLAGS="/nologo /MD /W3 /O2 /Oy-"
+  AD_CFLAGS_DEBUG="/nologo /Od /MDd /W3 /Z7"
   AD_LDFLAGS="/nologo"
   AD_LDFLAGS_DEBUG="/nologo /debug"
-  AD_MAKE="nmake"
+  AD_MAKE=nmake.exe
+  AD_AS=ml
+  
+  if [ "$AD_ARCH" = "x64" ] || [ "$AD_ARCH" = "x86" ]
+  then
+     AD_AS=ml64
+  fi
   
   export PATH="$PATH:$BASEDIR"
     echo "PATH: $PATH"
@@ -450,21 +456,27 @@ BuildZlib()
       echo COMPILE MSVC
       TPLATFORM=x64
       TCONFIG=Release
-	  TCFLAGS=$AD_CFLAGS
-	  TLDFLAGS=$AD_LDFLAGS
+	    TCFLAGS=$AD_CFLAGS
+      TLDFLAGS=$AD_LDFLAGS
       
       if [ $3 = "x86" ]; then
         TPLATFORM=Win32
-		TCFLAGS="-DASMV -DASMINF LOC=\"-DASMV -DASMINF\" OBJA=\"inffas32.obj match686.obj\""
+        TCFLAGS="$TCFLAGS /DASMV /DASMINF ?I."
+        TLOC="/DASMV /DASMINF /I."
+        TOBJA="inffas32.obj match686.obj"
       fi
-	  if [ $3 = "x64" ]; then
-        TCFLAGS="-DASMV -DASMINF AS=ml64 LOC=\"-DASMV -DASMINF -I.\" OBJA=\"inffasx64.obj gvmat64.obj inffas8664.obj\""
+	    if [ $3 = "x64" ]; then
+        TCFLAGS="$TCFLAGS /DASMV /DASMINF /I."
+        TLOC="/DASMV /DASMINF /I."
+        TOBJA="inffasx64.obj gvmat64.obj inffas8664.obj"
       fi
-      
+	
       if [ $4 = "debug" ]; then
         TCONFIG="Debug"
-		TCFLAGS=$AD_CFLAGS_DEBUG
-		TLDFLAGS=$AD_LDFLAGS_DEBUG
+		    TCFLAGS=$AD_CFLAGS_DEBUG
+		    TLDFLAGS=$AD_LDFLAGS_DEBUG
+        TLOC=""
+        TOBJA=""
       fi
       
       StartBuild $AD_ZLIB $AD_ZLIB_DIR $1
@@ -474,8 +486,13 @@ BuildZlib()
       #cp $BASEDIR/thirdparty/$AD_ZLIB/zlibvc.vcxproj_14 $AD_DIR/$AD_ZLIB/zlibvc.vcxproj
       
       #translate.sh MSBuild.exe $AD_ZLIB_FULL/contrib/vstudio/vc14/zlibvc.sln /p:Configuration="$TCONFIG" /p:Platform="$TPLATFORM"
-	  
-	  $AD_MAKE "-f $AD_ZLIB_FULL/win32/Makefile.msc" CFLAGS="$TCFLAGS" LDFLAGS="$TLDFLAGS"
+
+	    $AD_MAKE -f win32/Makefile.msc /E "CFLAGS=$TCFLAGS" "LDFLAGS=$TLDFLAGS" AS="$AD_AS" LOC="$TLOC." OBJA="$TOBJA"
+	    
+      test -d "build/$1/lib" || mkdir -p "build/$1/lib"
+      cp zlib1.dll build/$1/lib/zlib1.dll
+      cp zlib.lib build/$1/lib/zlib.lib
+      cp zdll.lib build/$1/lib/zdll.lib
       
       #TSTATFOLDER=ZlibStatRelease
       #TDLLFOLDER=ZlibDllRelease
