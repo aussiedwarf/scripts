@@ -1,9 +1,10 @@
 #!/bin/bash
 set -x #echo on
-#./build.sh -c clang -o ubuntu16.04 -a x64
-#./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
-#./build.sh -c mingw -b giflib 2>&1 | tee output.log
+# ./build.sh -c clang -o ubuntu16.04 -a x64
+# ./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
+# ./build.sh -c mingw -b giflib 2>&1 | tee output.log
 # ./build.sh -c msvc15 -a x64 -b zlib 2>&1 | tee output.log
+# ./build.sh -c msvc15 -a x86 -b zlib 2>&1 | tee output.log
 #
 # static          static lib linked to static libs
 # shared_all      shared lib linked to shared libs
@@ -352,11 +353,11 @@ then
   AD_LDFLAGS="/nologo"
   AD_LDFLAGS_DEBUG="/nologo /debug"
   AD_MAKE=nmake.exe
-  AD_AS=ml
+  AD_AS=ml.exe
   
-  if [ "$AD_ARCH" = "x64" ] || [ "$AD_ARCH" = "x86" ]
+  if [ "$AD_ARCH" = "x64" ] 
   then
-     AD_AS=ml64
+     AD_AS=ml64.exe
   fi
   
   export PATH="$PATH:$BASEDIR"
@@ -461,7 +462,7 @@ BuildZlib()
       
       if [ $3 = "x86" ]; then
         TPLATFORM=Win32
-        TCFLAGS="$TCFLAGS /DASMV /DASMINF ?I."
+        TCFLAGS="$TCFLAGS /DASMV /DASMINF /I."
         TLOC="/DASMV /DASMINF /I."
         TOBJA="inffas32.obj match686.obj"
       fi

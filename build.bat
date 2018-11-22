@@ -7,5 +7,6 @@ IF "%1"=="clang" SET PATH=%PATH%;C:\dev\LLVM\bin
 ::IF "%1"=="msvc" SET PATH=%PATH%;"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64"
 IF "%1"=="msvc15" "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 :: "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+:: "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
   
 echo %PATH%
