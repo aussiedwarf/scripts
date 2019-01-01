@@ -93,9 +93,9 @@ if [ ! -f thirdparty/SDL/SDL2-2.0.9.tar.gz ]; then
   tar -xf thirdparty/SDL/SDL2-2.0.9.tar.gz -C thirdparty/SDL/
 fi
 
-if [ ! -f thirdparty/SDL/SDL2_image-2.0.3.tar.gz  ]; then
-  wget -O thirdparty/SDL/SDL2_image-2.0.3.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.3.tar.gz
-  tar -xf thirdparty/SDL/SDL2_image-2.0.3.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_image-2.0.4.tar.gz  ]; then
+  wget -O thirdparty/SDL/SDL2_image-2.0.4.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.4.tar.gz
+  tar -xf thirdparty/SDL/SDL2_image-2.0.4.tar.gz -C thirdparty/SDL/
 fi
 
 if [ ! -f thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz ]; then

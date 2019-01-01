@@ -85,11 +85,11 @@ SetBuild()
     xz )            AD_BUILD_XZ=true;;
     libtiff )       AD_BUILD_LIBTIFF=true;;
     tiff )          AD_BUILD_LIBTIFF=true;;
+    giflib )        AD_BUILD_GIFLIB=true;;
     libwebp )       AD_BUILD_LIBWEBP=true;;
     webp )          AD_BUILD_LIBWEBP=true;;
-    giflib )        AD_BUILD_GIFLIB=true;;
-    freetype )      AD_BUILD_FREETYPE=true;;
     bzip )          AD_BUILD_BZIP=true;;
+    freetype )      AD_BUILD_FREETYPE=true;;
     libbpg )        AD_BUILD_LIBBPG=true;;
     sdl2 )          AD_BUILD_SDL2=true;;
     sdl2_image )    AD_BUILD_SDL2_IMAGE=true;;
@@ -271,7 +271,7 @@ AD_SDL2_DIR=SDL2-2.0.9
 AD_SDL2=SDL
 AD_SDL2_FULL="$AD_DIR/$AD_SDL2/$AD_SDL2_DIR"
 
-AD_SDL2_IMAGE_DIR=SDL2_image-2.0.3
+AD_SDL2_IMAGE_DIR=SDL2_image-2.0.4
 AD_SDL2_IMAGE=SDL
 AD_SDL2_IMAGE_FULL="$AD_DIR/$AD_SDL2_IMAGE/$AD_SDL2_IMAGE_DIR"
 
@@ -805,8 +805,23 @@ BuildLibjpegturbo()
     else
 
       StartBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
-      cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
+      #cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
+      #make
+      #cd "$AD_LIBJPGTURBO_FULL/build/$1"
+      
+      if [ "$4" = "debug" ]; then
+        cmake -G"Unix Makefiles" -DWITH_JPEG8=1 -DCMAKE_INSTALL_PREFIX="$AD_LIBJPGTURBO_FULL/build/$1" -DCMAKE_BUILD_TYPE=Debug
+      else
+        cmake -G"Unix Makefiles" -DWITH_JPEG8=1 -DCMAKE_INSTALL_PREFIX="$AD_LIBJPGTURBO_FULL/build/$1"
+      fi
+      
       make
+      make install
+       
+      #../../../../../
+
+      #cd "$AD_LIBJPGTURBO_FULL"
+      
       EndBuild $AD_LIBJPGTURBO $AD_LIBJPGTURBO_DIR $1
     fi
     
@@ -1177,6 +1192,7 @@ BuildGiflib()
 
 #permissive
 #$AD_LIBWEBP/./autogen.sh
+#requires giblib libjpeg libtiff
 BuildLibwebp()
 {
 
@@ -1402,7 +1418,9 @@ BuildFreetype()
 
     fi
     
-    $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    #removed rc since not compiling on ubuntu 18.04
+    #RC="$AD_RC"
     CheckStatus "Freetype"
     
     #Adding cc and cxx here causes freetype to not compile
