@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x #echo on
-# ./build.sh -c gcc -o linux -a x64 -b glew
+# ./build.sh -c gcc -o linux -a x64 -b sdl2 2>&1 | tee output.log
 # ./build.sh -c clang -o linux -a x64
 # ./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
 # ./build.sh -c mingw -b giflib 2>&1 | tee output.log
@@ -1504,7 +1504,13 @@ BuildSdl2()
         T_AR=""
       fi
       
-      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build/$1 --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" $T_AR AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES"
+      T_VULKAN=""
+      if [ AD_OS="linux" ]
+      then
+        T_VULKAN="--enable-video-vulkan"
+      fi
+      
+      $AD_SDL2_FULL/./configure CFLAGS="$TCFLAGS" --enable-sse2 --enable-sse3 $TSTATIC $TSHARED --prefix=$AD_SDL2_FULL/build/$1 --exec-prefix=$AD_SDL2_FULL/build/$1 $TFLAGS CC="$AD_CC" CXX="$AD_CXX" LD="$AD_LD" $T_AR AS="$AD_AS" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" WINDRES="$AD_WINDRES" $T_VULKAN
       CheckStatus "SDL2"
       #ALSA or esd may be needed on linux for sound
       #--with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
