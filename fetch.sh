@@ -121,3 +121,12 @@ if [ ! -f thirdparty/libbpg/libbpg-0.9.8.tar.gz ]; then
   tar -xf thirdparty/libbpg/libbpg-0.9.8.tar.gz -C thirdparty/libbpg/
 fi
 
+#glew
+#http://glew.sourceforge.net/
+mkdir -p thirdparty/glew
+if [ ! -f thirdparty/glew/glew-2.1.0.tgz ]; then
+  wget -O thirdparty/glew/glew-2.1.0.tgz https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.tgz/download
+  tar -xf thirdparty/glew/glew-2.1.0.tgz -C thirdparty/glew/
+fi
+
+

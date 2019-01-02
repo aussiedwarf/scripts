@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x #echo on
-# ./build.sh -c clang -o ubuntu16.04 -a x64
+# ./build.sh -c gcc -o linux -a x64 -b glew
+# ./build.sh -c clang -o linux -a x64
 # ./build.sh -c clang -o macos -b zlib 2>&1 | tee output.log
 # ./build.sh -c mingw -b giflib 2>&1 | tee output.log
 # ./build.sh -c msvc15 -a x64 -b zlib 2>&1 | tee output.log
@@ -66,7 +67,7 @@ AD_BUILD_SDL2=false
 AD_BUILD_SDL2_IMAGE=false
 AD_BUILD_SDL2_TTF=false
 AD_BUILD_SDL2_NET=false
-
+AD_BUILD_GLEW=false
 
 
 SetBuild()
@@ -95,6 +96,7 @@ SetBuild()
     sdl2_image )    AD_BUILD_SDL2_IMAGE=true;;
     sdl2_ttf )      AD_BUILD_SDL2_TTF=true;;
     sdl2_net )      AD_BUILD_SDL2_NET=true;;
+    glew )          AD_BUILD_GLEW=true;;
   esac
 }
 
@@ -244,7 +246,6 @@ AD_LIBTIFF_DIR=tiff-4.0.9
 AD_LIBTIFF=libtiff
 AD_LIBTIFF_FULL="$AD_DIR/$AD_LIBTIFF/$AD_LIBTIFF_DIR"
 
-#todo change to version from git
 AD_LIBWEBP_DIR=libwebp-1.0.0
 AD_LIBWEBP=libwebp
 AD_LIBWEBP_FULL="$AD_DIR/$AD_LIBWEBP/$AD_LIBWEBP_DIR"
@@ -282,6 +283,10 @@ AD_SDL2_TTF_FULL="$AD_DIR/$AD_SDL2_TTF/$AD_SDL2_TTF_DIR"
 AD_SDL2_NET_DIR=SDL2_net-2.0.1
 AD_SDL2_NET=SDL
 AD_SDL2_NET_FULL="$AD_DIR/$AD_SDL2_NET/$AD_SDL2_NET_DIR"
+
+AD_GLEW_DIR=glew-2.1.0
+AD_GLEW=glew
+AD_GLEW_FULL="$AD_DIR/$AD_GLEW/$AD_GLEW_DIR"
 
 #http://blog.httrack.com/blog/2014/03/09/what-are-your-gcc-flags/
 AD_CFLAGS="-D_FILE_OFFSET_BITS=64 -Wall -O2 -fomit-frame-pointer "
@@ -1758,6 +1763,41 @@ BuildSdl2Net()
 }
 
 
+BuildGlew()
+{
+  if [ $5 = "free" ]; then
+    echo "Building Glew"
+    
+    TCFLAGS=$AD_CFLAGS
+    if [ "$4" = "debug" ]; then
+      TCFLAGS=$AD_CFLAGS_DEBUG
+    fi
+    
+    StartBuild $AD_GLEW $AD_GLEW_DIR $1
+    
+    
+    if [ "$2" = "static" ]; then
+      $AD_CC src/glew.c -Iinclude -DGLEW_NO_GLU -DGLEW_BUILD -DGLEW_STATIC -lGL -c -o glew.o $TCFLAGS
+      CheckStatus "Glew"
+      $AD_AR rcs libglew.a glew.o
+      CheckStatus "Glew"
+    else
+      echo "TODO: Currently not building shared glew."
+    fi
+    
+    mkdir -p "build/$1/lib"
+    cp libglew.a "build/$1/lib/libglew.a"
+    
+    #need to remove build folder since it later cannot be merged in the endbuild command
+    cp -R "$BASEDIR/thirdparty/$AD_GLEW/$AD_GLEW_DIR/build" "$TEMPDIR/tempbuild"
+    rm -r "$BASEDIR/thirdparty/$AD_GLEW/$AD_GLEW_DIR/build"
+    EndBuild $AD_GLEW $AD_GLEW_DIR $1
+    cp -R "$TEMPDIR/tempbuild" "$BASEDIR/thirdparty/$AD_GLEW/$AD_GLEW_DIR/build"
+    rm -r "$TEMPDIR/tempbuild"
+    
+  fi
+
+}
 
 #https://www.freedesktop.org/wiki/Software/HarfBuzz/
 #complex package requires ICU flus freetype circular dependency
@@ -1858,6 +1898,11 @@ BuildAll()
   if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_SDL2_NET" = true ]
   then
     BuildSdl2Net $EXEC_DIR $1 $2 $3 $4
+  fi
+  
+  if [ "$AD_BUILD_ALL" = true ] || [ "$AD_BUILD_GLEW" = true ]
+  then
+    BuildGlew $EXEC_DIR $1 $2 $3 $4
   fi
 }
 
