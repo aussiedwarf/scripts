@@ -226,15 +226,15 @@ AD_ZLIB_DIR=zlib-1.2.11
 AD_ZLIB=zlib
 AD_ZLIB_FULL="$AD_DIR/$AD_ZLIB/$AD_ZLIB_DIR"
 
-AD_LIBPNG_DIR=libpng-1.6.35
+AD_LIBPNG_DIR=libpng-1.6.37
 AD_LIBPNG=libpng
 AD_LIBPNG_FULL="$AD_DIR/$AD_LIBPNG/$AD_LIBPNG_DIR"
 
-AD_LIBJPG_DIR=jpeg-9b
+AD_LIBJPG_DIR=jpeg-9d
 AD_LIBJPG=libjpeg 
 AD_LIBJPG_FULL="$AD_DIR/$AD_LIBJPG/$AD_LIBJPG_DIR"
 
-AD_LIBJPGTURBO_DIR=libjpeg-turbo-2.0.0
+AD_LIBJPGTURBO_DIR=libjpeg-turbo-2.0.4
 AD_LIBJPGTURBO=libjpeg-turbo
 AD_LIBJPGTURBO_FULL="$AD_DIR/$AD_LIBJPGTURBO/$AD_LIBJPGTURBO_DIR"
 
@@ -242,19 +242,19 @@ AD_XZ_DIR=xz-5.2.4
 AD_XZ=xz
 AD_XZ_FULL="$AD_DIR/$AD_XZ/$AD_XZ_DIR"
 
-AD_LIBTIFF_DIR=tiff-4.0.9
+AD_LIBTIFF_DIR=tiff-4.1.0
 AD_LIBTIFF=libtiff
 AD_LIBTIFF_FULL="$AD_DIR/$AD_LIBTIFF/$AD_LIBTIFF_DIR"
 
-AD_LIBWEBP_DIR=libwebp-1.0.0
+AD_LIBWEBP_DIR=libwebp-1.1.0
 AD_LIBWEBP=libwebp
 AD_LIBWEBP_FULL="$AD_DIR/$AD_LIBWEBP/$AD_LIBWEBP_DIR"
 
-AD_GIFLIB_DIR=giflib-5.1.4
+AD_GIFLIB_DIR=giflib-5.2.1
 AD_GIFLIB=giflib
 AD_GIFLIB_FULL="$AD_DIR/$AD_GIFLIB/$AD_GIFLIB_DIR"
 
-AD_FREETYPE_DIR=freetype-2.9.1
+AD_FREETYPE_DIR=freetype-2.10.1
 AD_FREETYPE=freetype
 AD_FREETYPE_FULL="$AD_DIR/$AD_FREETYPE/$AD_FREETYPE_DIR"
 
@@ -268,15 +268,15 @@ AD_LIBBPG_FULL="$AD_DIR/$AD_LIBBPG/$AD_LIBBPG_DIR"
 
 #AD_JBIGKIT=$AD_DIR/
 
-AD_SDL2_DIR=SDL2-2.0.9
+AD_SDL2_DIR=SDL2-2.0.10
 AD_SDL2=SDL
 AD_SDL2_FULL="$AD_DIR/$AD_SDL2/$AD_SDL2_DIR"
 
-AD_SDL2_IMAGE_DIR=SDL2_image-2.0.4
+AD_SDL2_IMAGE_DIR=SDL2_image-2.0.5
 AD_SDL2_IMAGE=SDL
 AD_SDL2_IMAGE_FULL="$AD_DIR/$AD_SDL2_IMAGE/$AD_SDL2_IMAGE_DIR"
 
-AD_SDL2_TTF_DIR=SDL2_ttf-2.0.14
+AD_SDL2_TTF_DIR=SDL2_ttf-2.0.15
 AD_SDL2_TTF=SDL
 AD_SDL2_TTF_FULL="$AD_DIR/$AD_SDL2_TTF/$AD_SDL2_TTF_DIR"
 
@@ -1104,6 +1104,7 @@ BuildLibtiff()
     
     
     $AD_MAKE install
+    CheckStatus "libtiff"
     
     mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/CMakeLists.txt $BASEDIR/temp
     mv $BASEDIR/thirdparty/$AD_LIBTIFF/$AD_LIBTIFF_DIR/build/Makefile.am $BASEDIR/temp
@@ -1129,9 +1130,9 @@ BuildGiflib()
   
     echo "Building giflib"
     
-    TCFLAGS=$AD_CFLAGS
+    TCFLAGS="$AD_CFLAGS -fPIC"
     if [ "$4" = "debug" ]; then
-      TCFLAGS=$AD_CFLAGS_DEBUG
+      TCFLAGS="$AD_CFLAGS_DEBUG -fPIC"
     fi
     
     TFLAGS=""
@@ -1167,12 +1168,15 @@ BuildGiflib()
     touch configure.ac aclocal.m4 configure Makefile.am Makefile.in
     #autoreconf -f -i
     
+    chmod +x $AD_GIFLIB_FULL/configure
     
-    $AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
+    #$AD_GIFLIB_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_GIFLIB_FULL/build/$1 --exec-prefix=$AD_GIFLIB_FULL/build/$1 CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     
     CheckStatus "giflib"
     
-    $AD_MAKE CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
+    #--exec-prefix=$AD_GIFLIB_FULL/build/$1 $TSHARED $TSTATIC
+    $AD_MAKE CFLAGS="$TCFLAGS" $TFLAGS PREFIX="$AD_GIFLIB_FULL/build/$1" CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" -j"$AD_THREADS"
+    
     CheckStatus "giflib"
     
     if [ "$AD_COMPILER" = "mingw" ]
@@ -1188,7 +1192,8 @@ BuildGiflib()
       fi
     fi
     
-    $AD_MAKE install
+    $AD_MAKE install PREFIX="$AD_GIFLIB_FULL/build/$1"
+    CheckStatus "giflib"
     
     EndBuild $AD_GIFLIB $AD_GIFLIB_DIR $1
   
@@ -1280,6 +1285,7 @@ BuildLibwebp()
     fi
     
     $AD_MAKE install
+    CheckStatus "libwebp"
     
     EndBuild $AD_LIBWEBP $AD_LIBWEBP_DIR $1
   
@@ -1423,6 +1429,7 @@ BuildFreetype()
 
     fi
     
+    #
     $AD_FREETYPE_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_FREETYPE_FULL/build/$1 --exec-prefix=$AD_FREETYPE_FULL/build/$1 ZLIB_CFLAGS=-I$AD_ZLIB_FULL/build/$1/include ZLIB_LIBS=$AD_ZLIB_FULL/build/$1 BZIP2_CFLAGS=-I$AD_BZIP_FULL/build/$1/include BZIP2_LIBS=$AD_BZIP_FULL/build/$1/lib LIBPNG_CFLAGS=-I$AD_LIBPNG_FULL/build/$1/include LIBPNG_LIBS=$AD_LIBPNG_FULL/build/$1 --with-harfbuzz=no CC="$AD_CC" CXX="$AD_CXX" $T_AR AS="$AD_AS" LD="$AD_LD" STRIP="$AD_STRIP" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
     #removed rc since not compiling on ubuntu 18.04
     #RC="$AD_RC"
@@ -1673,17 +1680,21 @@ BuildSdl2Ttf()
       $AD_SDL2_TTF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC --prefix=$AD_SDL2_TTF_FULL/build/$1 --exec-prefix=$AD_SDL2_TTF_FULL/build/$1 --with-freetype-prefix=$AD_FREETYPE_FULL/build/$1/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE_FULL/build/$1/lib --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 CPPFLAGS="-I$AD_FREETYPE_FULL/build/$1/include/freetype2" CC="$AD_CC" CXX="$AD_CXX"
       CheckStatus "SDL2_image"
       $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 -framework CoreVideo -framework CoreGraphics -framework ImageIO -framework CoreAudio -framework AudioToolbox -framework Foundation -framework CoreFoundation -framework CoreServices -framework OpenGL -framework ForceFeedback -framework IOKit -framework Cocoa -framework Carbon" LDFLAGS="-L$AD_FREETYPE_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib" CC="$AD_CC" CXX="$AD_CXX" -j"$AD_THREADS"
-      CheckStatus "SDL2_image"
+      CheckStatus "SDL2_ttf"
 
     else
 
-      $AD_SDL2_TTF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_SDL2_TTF_FULL/build/$1 --exec-prefix=$AD_SDL2_TTF_FULL/build/$1 --with-freetype-prefix=$AD_FREETYPE_FULL/build/$1/include/freetype2 --with-freetype-exec-prefix=$AD_FREETYPE_FULL/build/$1/lib --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 CPPFLAGS="-I$AD_FREETYPE_FULL/build/$1/include/freetype2 -I$AD_SDL2_FULL/build/$1/include/SDL2" LIBS="-L$AD_SDL2_FULL/build/$1/lib -L$AD_FREETYPE_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1 $TLIBS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB"
-      CheckStatus "SDL2_image"
+      #FT2_CONFIG=$AD_FREETYPE_FULL/build/$1/lib/pkgconfig/freetype2.pc
+      #FT2_CFLAGS="-L$AD_FREETYPE_FULL/build/$1/lib"
+      #--with-ft-prefix=$AD_FREETYPE_FULL/build/$1/include/freetype2 --with-ft-exec-prefix=$AD_FREETYPE_FULL/build/$1/lib
+      $AD_SDL2_TTF_FULL/./configure CFLAGS="$TCFLAGS" $TSHARED $TSTATIC $TFLAGS --prefix=$AD_SDL2_TTF_FULL/build/$1 --exec-prefix=$AD_SDL2_TTF_FULL/build/$1 --with-sdl-prefix=$AD_SDL2_FULL/build/$1 --with-sdl-exec-prefix=$AD_SDL2_FULL/build/$1 CPPFLAGS="-I$AD_FREETYPE_FULL/build/$1/include/freetype2 -I$AD_SDL2_FULL/build/$1/include/SDL2" LIBS="-L$AD_SDL2_FULL/build/$1/lib -L$AD_FREETYPE_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_ZLIB_FULL/build/$1 $TLIBS" CC="$AD_CC" CXX="$AD_CXX" AR="$AD_AR" LD="$AD_LD" STRIP="$AD_STRIP" RC="$AD_RC" DLLTOOL="$AD_DLLTOOL" RANLIB="$AD_RANLIB" FT2_CONFIG=$AD_FREETYPE_FULL/build/$1/lib/pkgconfig/freetype2.pc FT2_LIBS="-L$AD_FREETYPE_FULL/build/$1/lib" FT2_CFLAGS="-I$AD_FREETYPE_FULL/build/$1/include/freetype2"
+      
+      CheckStatus "SDL2_ttf"
       
       if [ "$AD_COMPILER" = "mingw" ]
       then
         $AD_MAKE -j"$AD_THREADS"
-        CheckStatus "SDL2_image"
+        CheckStatus "SDL2_ttf"
         
 
         #rename windows files to unix in .dep foler
@@ -1695,7 +1706,7 @@ BuildSdl2Ttf()
 
       else
         $AD_MAKE LIBS="-lfreetype -lSDL2 -lpng -lbz2 " LDFLAGS="-L$AD_FREETYPE_FULL/build/$1/lib -L$AD_LIBPNG_FULL/build/$1/lib -L$AD_SDL2_FULL/build/$1/lib -L$AD_BZIP_FULL/build/$1/lib" -j"$AD_THREADS"
-        CheckStatus "SDL2_image"
+        CheckStatus "SDL2_ttf"
       fi
     fi
 

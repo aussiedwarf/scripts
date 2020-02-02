@@ -17,23 +17,23 @@ fi
 #http://www.libpng.org/pub/png/libpng.html
 #md5 e01be057a9369183c959b793a685ad15
 mkdir -p thirdparty/libpng
-if [ ! -f thirdparty/libpng/libpng-1.6.35.tar.xz ]; then
-  wget -O thirdparty/libpng/libpng-1.6.35.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.35.tar.xz
-  tar -xf thirdparty/libpng/libpng-1.6.35.tar.xz -C thirdparty/libpng/
+if [ ! -f thirdparty/libpng/libpng-1.6.37.tar.xz ]; then
+  wget -O thirdparty/libpng/libpng-1.6.37.tar.xz https://download.sourceforge.net/libpng/libpng-1.6.37.tar.xz
+  tar -xf thirdparty/libpng/libpng-1.6.37.tar.xz -C thirdparty/libpng/
 fi
 
 #http://www.ijg.org/
 mkdir -p thirdparty/libjpeg/
-if [ ! -f thirdparty/libjpeg/jpegsrc.v9b.tar.gz ]; then
-  wget -O thirdparty/libjpeg/jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
-  tar -xf thirdparty/libjpeg/jpegsrc.v9b.tar.gz -C thirdparty/libjpeg/
+if [ ! -f thirdparty/libjpeg/jpegsrc.v9d.tar.gz ]; then
+  wget -O thirdparty/libjpeg/jpegsrc.v9d.tar.gz http://www.ijg.org/files/jpegsrc.v9d.tar.gz
+  tar -xf thirdparty/libjpeg/jpegsrc.v9d.tar.gz -C thirdparty/libjpeg/
 fi
 
 #https://libjpeg-turbo.org/
 mkdir -p thirdparty/libjpeg-turbo
-if [ ! -f thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz ]; then
-  wget -O thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz https://downloads.sourceforge.net/project/libjpeg-turbo/2.0.0/libjpeg-turbo-2.0.0.tar.gz
-  tar -xf thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.0.tar.gz -C thirdparty/libjpeg-turbo/
+if [ ! -f thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.4.tar.gz ]; then
+  wget -O thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.4.tar.gz https://downloads.sourceforge.net/project/libjpeg-turbo/2.0.4/libjpeg-turbo-2.0.4.tar.gz
+  tar -xf thirdparty/libjpeg-turbo/libjpeg-turbo-2.0.4.tar.gz -C thirdparty/libjpeg-turbo/
 fi
 
 #xz
@@ -47,17 +47,17 @@ fi
 #libtiff
 #http://www.simplesystems.org/libtiff/
 mkdir -p thirdparty/libtiff
-if [ ! -f thirdparty/libtiff/tiff-4.0.9.tar.gz ]; then
-  wget -O thirdparty/libtiff/tiff-4.0.9.tar.gz https://download.osgeo.org/libtiff/tiff-4.0.9.tar.gz
-  tar -xf thirdparty/libtiff/tiff-4.0.9.tar.gz -C thirdparty/libtiff/
+if [ ! -f thirdparty/libtiff/tiff-4.1.0.tar.gz ]; then
+  wget -O thirdparty/libtiff/tiff-4.1.0.tar.gz https://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
+  tar -xf thirdparty/libtiff/tiff-4.1.0.tar.gz -C thirdparty/libtiff/
 fi
 
 
 #http://giflib.sourceforge.net/
 mkdir -p thirdparty/giflib
-if [ ! -f thirdparty/giflib/giflib-5.1.4.tar.bz2 ]; then
-  wget -O thirdparty/giflib/giflib-5.1.4.tar.bz2 https://downloads.sourceforge.net/project/giflib/giflib-5.1.4.tar.bz2
-  tar -xf thirdparty/giflib/giflib-5.1.4.tar.bz2 -C thirdparty/giflib/
+if [ ! -f thirdparty/giflib/giflib-5.2.1.tar.gz ]; then
+  wget -O thirdparty/giflib/giflib-5.2.1.tar.gz https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz
+  tar -xf thirdparty/giflib/giflib-5.2.1.tar.gz -C thirdparty/giflib/
 fi
 
 #http://www.bzip.org/
@@ -71,36 +71,36 @@ fi
 #https://freetype.org/index.html
 #https://download.savannah.gnu.org/releases/freetype/
 mkdir -p thirdparty/freetype
-if [ ! -f thirdparty/freetype/freetype-2.9.1.tar.bz2 ]; then
-  wget -O thirdparty/freetype/freetype-2.9.1.tar.bz2 https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
-  tar -xf thirdparty/freetype/freetype-2.9.1.tar.bz2 -C thirdparty/freetype
+if [ ! -f thirdparty/freetype/freetype-2.10.1.tar.gz ]; then
+  wget -O thirdparty/freetype/freetype-2.10.1.tar.gz https://download.savannah.gnu.org/releases/freetype/freetype-2.10.1.tar.gz
+  tar -xf thirdparty/freetype/freetype-2.10.1.tar.gz -C thirdparty/freetype
 fi
 
 #webp
 mkdir -p thirdparty/libwebp
-git clone https://chromium.googlesource.com/webm/libwebp thirdparty/libwebp/libwebp-1.0.0
-cd thirdparty/libwebp/libwebp-1.0.0
+git clone https://chromium.googlesource.com/webm/libwebp thirdparty/libwebp/libwebp-1.1.0
+cd thirdparty/libwebp/libwebp-1.1.0
 git branch -v -a
-git checkout -b 1.0.0 origin/1.0.0
+git checkout -b 1.1.0 origin/1.1.0
 cd ../../../
 #SDL1
 
 #SDL2
 mkdir -p thirdparty/SDL
 
-if [ ! -f thirdparty/SDL/SDL2-2.0.9.tar.gz ]; then
-  wget -O thirdparty/SDL/SDL2-2.0.9.tar.gz https://www.libsdl.org/release/SDL2-2.0.9.tar.gz
-  tar -xf thirdparty/SDL/SDL2-2.0.9.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2-2.0.10.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2-2.0.10.tar.gz https://www.libsdl.org/release/SDL2-2.0.10.tar.gz
+  tar -xf thirdparty/SDL/SDL2-2.0.10.tar.gz -C thirdparty/SDL/
 fi
 
-if [ ! -f thirdparty/SDL/SDL2_image-2.0.4.tar.gz  ]; then
-  wget -O thirdparty/SDL/SDL2_image-2.0.4.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.4.tar.gz
-  tar -xf thirdparty/SDL/SDL2_image-2.0.4.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_image-2.0.5.tar.gz  ]; then
+  wget -O thirdparty/SDL/SDL2_image-2.0.5.tar.gz https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz
+  tar -xf thirdparty/SDL/SDL2_image-2.0.5.tar.gz -C thirdparty/SDL/
 fi
 
-if [ ! -f thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz ]; then
-  wget -O thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.14.tar.gz
-  tar -xf thirdparty/SDL/SDL2_ttf-2.0.14.tar.gz -C thirdparty/SDL/
+if [ ! -f thirdparty/SDL/SDL2_ttf-2.0.15.tar.gz ]; then
+  wget -O thirdparty/SDL/SDL2_ttf-2.0.15.tar.gz https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.15.tar.gz
+  tar -xf thirdparty/SDL/SDL2_ttf-2.0.15.tar.gz -C thirdparty/SDL/
 fi
 
 if [ ! -f thirdparty/SDL/SDL2_net-2.0.1.tar.gz ]; then
